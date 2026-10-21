@@ -15,7 +15,7 @@
 ### ١. تفعيل الموقع على GitHub Pages
 1. في المستودع: **Settings** ← **Pages**
 2. تحت **Source** اختر **Deploy from a branch**، ثم الفرع `main` والمجلد `/ (root)`، واضغط **Save**
-3. في خانة **Custom domain** اكتب `kassep.com` واضغط **Save**
+3. بعد دقيقة أو دقيقتين يشتغل الموقع على: https://fm748279-cloud.github.io/Kassel/
 
 ### ٢. ربط الدومين من GoDaddy
 في GoDaddy: **Domain** ← **kassep.com** ← **DNS**، ثم:
@@ -29,7 +29,8 @@
 | CNAME | www | fm748279-cloud.github.io |
 
 احذف أي سجل **A** قديم للاسم `@`، وأي توجيه (Forwarding) مفعّل على الدومين.
-بعد ما يشتغل الدومين (من دقائق إلى ساعات)، فعّل **Enforce HTTPS** من صفحة Pages.
+بعدها ارجع لـ **Settings** ← **Pages** واكتب `kassep.com` في خانة **Custom domain** واضغط **Save**.
+وبعد ما يشتغل الدومين (من دقائق إلى ساعات) فعّل **Enforce HTTPS** من نفس الصفحة.
 
 ### ٣. قاعدة البيانات (Supabase)
 1. أنشئ حساب على supabase.com، ثم **New project** (اختر أقرب منطقة، مثل Frankfurt أو Mumbai)
