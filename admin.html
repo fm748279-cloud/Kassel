@@ -230,6 +230,14 @@ body{padding-bottom:80px}
   </div>
 </div>
 
+<div class="overlay" id="askOv" style="z-index:60"></div>
+<div class="modal" id="askModal" role="alertdialog" aria-modal="true" aria-labelledby="askMsg" style="z-index:61;width:min(400px,calc(100% - 24px))">
+  <div class="modal-b">
+    <p id="askMsg" style="margin:0 0 16px;font-weight:600"></p>
+    <div style="display:flex;gap:8px"><button class="btn danger" id="askYes" type="button" style="flex:1">تأكيد</button><button class="btn ghost" id="askNo" type="button" style="flex:1">إلغاء</button></div>
+  </div>
+</div>
+
 <datalist id="makesList"></datalist>
 <datalist id="catsList"></datalist>
 <datalist id="brandsList"></datalist>
@@ -245,6 +253,16 @@ const ORDER_ST = {new:"جديد", confirmed:"مؤكد", shipped:"تم الشحن
 const REQ_ST = {new:"جديد", quoted:"تم التسعير", done:"مكتمل", cancelled:"ملغي"};
 let PARTS = [], ORDERS = [], REQS = [];
 let editImages = [], uploading = 0;
+
+/* ---------- in-page confirmation ---------- */
+function ask(msg, yes = "تأكيد") {
+  return new Promise(res => {
+    $("#askMsg").textContent = msg; $("#askYes").textContent = yes;
+    const done = v => { $("#askModal").classList.remove("on"); $("#askOv").classList.remove("on"); $("#askYes").onclick = $("#askNo").onclick = $("#askOv").onclick = null; res(v); };
+    $("#askYes").onclick = () => done(true); $("#askNo").onclick = () => done(false); $("#askOv").onclick = () => done(false);
+    $("#askOv").classList.add("on"); $("#askModal").classList.add("on"); $("#askNo").focus();
+  });
+}
 
 /* ---------- auth ---------- */
 async function boot() {
@@ -273,7 +291,7 @@ $("#loginForm").addEventListener("submit", async e => {
   } finally { b.disabled = false; b.textContent = "دخول"; }
 });
 $("#logout").onclick = async () => { await DB.signOut(); location.reload(); };
-$("#resetDemo").onclick = () => { if (confirm("إعادة البيانات التجريبية ومسح تعديلاتك؟")) { DB.resetDemo(); location.reload(); } };
+$("#resetDemo").onclick = async () => { if (await ask("إعادة البيانات التجريبية ومسح كل تعديلاتك؟", "إعادة البيانات")) { DB.resetDemo(); location.reload(); } };
 
 async function start() {
   $("#loginView").classList.add("hide"); $("#appView").classList.remove("hide");
@@ -429,8 +447,8 @@ function openEditor(id) {
   $("#partModal").classList.add("on"); $("#ov").classList.add("on"); document.body.style.overflow = "hidden";
   $("#partModal").scrollTop = 0;
 }
-function closeEditor() {
-  if (uploading && !confirm("فيه صور قيد الرفع، تبي تقفل؟")) return;
+async function closeEditor() {
+  if (uploading && !(await ask("فيه صور قيد الرفع، تبي تقفل؟", "إغلاق"))) return;
   $("#partModal").classList.remove("on"); $("#ov").classList.remove("on"); document.body.style.overflow = "";
 }
 function toggleSrc() { $("#srcField").classList.toggle("hide", $("#partForm").condition.value === "new"); }
@@ -475,7 +493,7 @@ $("#partForm").addEventListener("submit", async e => {
   finally { b.disabled = false; b.textContent = "حفظ القطعة"; }
 });
 $("#delBtn").onclick = async () => {
-  const id = $("#partForm").id.value; if (!id || !confirm("حذف القطعة نهائياً؟ (للإخفاء المؤقت استخدم زر الإخفاء)")) return;
+  const id = $("#partForm").id.value; if (!id || !(await ask("حذف القطعة نهائياً؟ للإخفاء المؤقت استخدم زر الإخفاء.", "حذف"))) return;
   try { await DB.deletePart(id); PARTS = PARTS.filter(p => p.id !== id); renderAll(); closeEditor(); K.toast("تم الحذف"); }
   catch (err) { K.toast("تعذر الحذف: " + err.message); }
 };

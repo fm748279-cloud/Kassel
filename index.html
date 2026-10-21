@@ -377,7 +377,7 @@ async function searchCatalog() {
   const shard = CAT.set.has(k.slice(0, 3)) ? k.slice(0, 3) : k.slice(0, 2);
   if (!CAT.set.has(shard)) { CAT.results = []; renderCatalog(); return renderGrid(); }
   if (!CAT.results.length) { box.classList.remove("hide"); $("#clist").innerHTML = `<div class="cload">جاري البحث في ${arNum(m.count)} رقم قطعة…</div>`; $("#catCount").textContent = ""; }
-  const rows = await catShard(shard);
+  const rows = await catShard((m.map && m.map[shard]) || shard);   // map: optional bundling of shards into fewer files
   if (seq !== catSeq) return;
   let res = rows.filter(r => pnKey(r[0]).startsWith(k) || (r[4] && pnKey(r[4]) === k));
   if (state.make) { const mk = m.makes.findIndex(x => x === state.make || x.includes(state.make)); if (mk >= 0) res = res.filter(r => r[1] === mk); }
