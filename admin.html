@@ -353,7 +353,7 @@ const waCustomer = (phone, text) => {
   return K.wa(text, p);
 };
 function orderCard(o) {
-  const items = (o.items || []).map(i => `<div><span>${esc(i.name)} ${i.part_number ? `<span class="pn muted">${esc(i.part_number)}</span>` : ""} × ${i.qty}</span><span>${money((+i.price || 0) * i.qty)}</span></div>`).join("");
+  const items = (o.items || []).map(i => `<div><span>${esc(i.name)} ${i.part_number ? `<span class="pn muted">${esc(i.part_number)}</span>` : ""}${i.make ? `، ${esc(i.make)}` : ""}${i.supplier ? `، <b>${esc(i.supplier)}</b>${i.sheet ? ` <span class="muted">(${esc(i.sheet)})</span>` : ""}` : ""}${i.code && i.code !== i.part_number ? `، كود <span class="pn">${esc(i.code)}</span>` : ""} × ${i.qty}</span><span>${money((+i.price || 0) * i.qty)}</span></div>`).join("");
   return `<div class="order">
     <div class="order-h"><div><b class="ltr">#${esc(o.code)}</b> · ${esc(o.customer_name)} <span class="badge st-${o.status}">${ORDER_ST[o.status]}</span>
       <div class="muted" style="font-size:.84rem">${K.date(o.created_at)} · ${esc(o.city)} · <span class="ltr">${esc(o.phone)}</span>${o.vin ? ` · VIN <span class="pn">${esc(o.vin)}</span>` : ""}${o.vehicle ? " · " + esc(o.vehicle) : ""}</div></div>
