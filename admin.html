@@ -1,0 +1,513 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>لوحة إدارة كاسب</title>
+<meta name="theme-color" content="#111418">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%23111418'/><text x='32' y='45' font-size='36' text-anchor='middle' fill='%23e8590c' font-family='Arial'>ك</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+body{padding-bottom:80px}
+.top{position:sticky;top:0;z-index:30;background:var(--ink);color:var(--ink-text)}
+.top .bar{display:flex;align-items:center;justify-content:space-between;height:58px;gap:10px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700}
+.logo .mark{width:34px;height:34px;border-radius:10px;background:var(--brand);color:#fff;display:grid;place-items:center}
+.logo small{display:block;font-size:.7rem;color:var(--ink-muted);font-weight:500;margin-top:-3px}
+.top a,.top button.link{color:var(--ink-muted);background:none;border:0;cursor:pointer;text-decoration:none;font-size:.88rem;padding:6px 8px;border-radius:8px}
+.top a:hover,.top button.link:hover{color:#fff;background:rgba(255,255,255,.06)}
+.tabs{display:flex;gap:4px;overflow-x:auto;padding:10px 0;scrollbar-width:none}
+.tabs button{flex:none;border:0;background:transparent;padding:8px 14px;border-radius:10px;cursor:pointer;font-weight:600;color:var(--muted);display:flex;gap:6px;align-items:center}
+.tabs button.on{background:var(--card);color:var(--text);box-shadow:var(--shadow)}
+.tabs .n{background:var(--brand);color:#fff;border-radius:99px;font-size:.72rem;min-width:20px;height:20px;display:grid;place-items:center;padding:0 5px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:6px 0 18px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;cursor:pointer}
+.stat b{display:block;font-size:1.6rem;line-height:1.2}
+.stat span{color:var(--muted);font-size:.85rem}
+.stat.alert b{color:var(--brand)}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:16px}
+.panel-h{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.panel-h h2{margin:0;font-size:1.1rem}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.toolbar .input{width:auto;flex:1;min-width:150px;padding:9px 12px}
+.toolbar select.input{flex:none}
+.rows{display:grid;gap:8px}
+.row{display:flex;gap:12px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--card)}
+.row .ph{width:56px;height:56px;border-radius:10px;background:var(--soft);display:grid;place-items:center;overflow:hidden;flex:none;font-size:1.5rem}
+.row .ph img{width:100%;height:100%;object-fit:cover}
+.row .info{flex:1;min-width:0}
+.row .info b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:.82rem;color:var(--muted);margin-top:2px}
+.row .side{display:flex;gap:6px;align-items:center;flex:none}
+.row.off{opacity:.55}
+.pn{font-family:ui-monospace,monospace;font-size:.8rem;direction:ltr}
+.order{border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--card)}
+.order-h{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap}
+.order-h b{font-size:1rem}
+.order .items{margin:10px 0;padding:10px 12px;background:var(--soft);border-radius:10px;font-size:.88rem}
+.order .items div{display:flex;justify-content:space-between;gap:10px;padding:2px 0}
+.order .acts{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.order .acts select{width:auto;padding:7px 10px}
+.st-new{background:var(--brand-soft);color:var(--brand)}
+.st-confirmed,.st-quoted{background:var(--used-soft);color:var(--used)}
+.st-shipped{background:var(--scrap-soft);color:var(--scrap)}
+.st-done{background:var(--new-soft);color:var(--new)}
+.st-cancelled{background:var(--danger-soft);color:var(--danger)}
+.empty{text-align:center;color:var(--muted);padding:26px 10px;border:1px dashed var(--line);border-radius:14px}
+
+/* form */
+.seg{display:flex;background:var(--soft);border-radius:12px;padding:4px;gap:4px}
+.seg label{flex:1;text-align:center;border-radius:9px;padding:8px;cursor:pointer;font-weight:600;color:var(--muted)}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg input:checked+span{color:var(--text)}
+.seg label:has(input:checked){background:var(--card);box-shadow:0 1px 3px rgba(0,0,0,.08);color:var(--text)}
+.imgs{display:grid;grid-template-columns:repeat(auto-fill,minmax(86px,1fr));gap:8px}
+.imgs .im{position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;background:var(--soft)}
+.imgs .im img{width:100%;height:100%;object-fit:cover}
+.imgs .im button{position:absolute;top:4px;left:4px;width:26px;height:26px;border-radius:8px;border:0;background:rgba(0,0,0,.65);color:#fff;cursor:pointer}
+.imgs .im .first{position:absolute;bottom:4px;right:4px;background:var(--brand);color:#fff;font-size:.66rem;border-radius:5px;padding:0 5px}
+.imgs .add-img{aspect-ratio:1;border:2px dashed var(--line);border-radius:10px;display:grid;place-items:center;cursor:pointer;color:var(--muted);text-align:center;font-size:.8rem;padding:6px}
+.imgs .add-img:hover{border-color:var(--brand);color:var(--brand)}
+.imgs .im.loading::after{content:"…";position:absolute;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.4);color:#fff;font-size:1.4rem}
+.fitrow{display:grid;grid-template-columns:1.2fr 1.2fr .8fr .8fr auto;gap:6px;margin-bottom:6px}
+.fitrow .input{padding:9px 10px}
+.fitrow .x{width:38px;height:auto}
+.switch{display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:500}
+.switch input{width:20px;height:20px;accent-color:var(--brand)}
+.form-foot{position:sticky;bottom:0;background:var(--card);padding:12px 0 2px;display:flex;gap:8px;border-top:1px solid var(--line);margin-top:6px}
+.form-foot .btn:first-child{flex:1}
+.fab{position:fixed;bottom:18px;left:18px;z-index:40;border-radius:16px;padding:14px 20px;box-shadow:0 10px 26px rgba(232,89,12,.35);font-size:1rem}
+
+/* login */
+.login{min-height:100vh;display:grid;place-items:center;padding:20px;background:var(--ink)}
+.login .box{background:var(--card);border-radius:20px;padding:26px;width:min(380px,100%)}
+.login h1{margin:10px 0 4px;font-size:1.3rem}
+.err{background:var(--danger-soft);color:var(--danger);border-radius:10px;padding:8px 12px;font-size:.88rem;margin-bottom:10px}
+.demo{background:var(--scrap-soft);color:var(--scrap);text-align:center;font-size:.82rem;padding:6px 16px}
+.demo button{background:none;border:0;color:inherit;text-decoration:underline;cursor:pointer;font-size:inherit}
+
+@media (max-width:720px){
+  .stats{grid-template-columns:1fr 1fr}
+  .fitrow{grid-template-columns:1fr 1fr;}
+  .fitrow .x{grid-column:auto;width:100%}
+  .row .side .btn.ghost{display:none}
+  .top .who{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- login -->
+<div class="login hide" id="loginView">
+  <form class="box" id="loginForm">
+    <span class="logo"><span class="mark">ك</span><span>كاسب<small>لوحة الإدارة</small></span></span>
+    <h1>تسجيل الدخول</h1>
+    <p class="muted" style="margin:0 0 16px;font-size:.9rem">للمشرفين فقط</p>
+    <div class="err hide" id="loginErr"></div>
+    <div class="field"><label>البريد الإلكتروني</label><input class="input ltr" name="email" type="email" required autocomplete="username" style="text-align:right"></div>
+    <div class="field"><label>كلمة المرور</label><input class="input ltr" name="password" type="password" required autocomplete="current-password" style="text-align:right"></div>
+    <button class="btn block" type="submit">دخول</button>
+  </form>
+</div>
+
+<!-- app -->
+<div id="appView" class="hide">
+  <div class="demo hide" id="demoBar">وضع تجريبي — التعديلات محفوظة في هذا المتصفح فقط. <button id="resetDemo">إعادة البيانات التجريبية</button></div>
+  <header class="top">
+    <div class="wrap bar">
+      <span class="logo"><span class="mark">ك</span><span>كاسب<small>لوحة الإدارة</small></span></span>
+      <div style="display:flex;align-items:center;gap:4px">
+        <span class="who muted" id="who" style="font-size:.82rem;color:var(--ink-muted)"></span>
+        <a href="./" target="_blank" rel="noopener">عرض الموقع ↗</a>
+        <button class="link" id="logout">خروج</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <nav class="tabs" id="tabs">
+      <button data-tab="home" class="on">الرئيسية</button>
+      <button data-tab="parts">القطع</button>
+      <button data-tab="orders">الطلبات <span class="n hide" id="nOrders"></span></button>
+      <button data-tab="requests">طلبات القطع <span class="n hide" id="nReqs"></span></button>
+    </nav>
+
+    <!-- home -->
+    <section data-view="home">
+      <div class="stats" id="stats"></div>
+      <div class="panel">
+        <div class="panel-h"><h2>آخر الطلبات</h2><button class="btn ghost sm" data-goto="orders">كل الطلبات</button></div>
+        <div class="rows" id="homeOrders"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-h"><h2>طلبات قطع تنتظر رد</h2><button class="btn ghost sm" data-goto="requests">الكل</button></div>
+        <div class="rows" id="homeReqs"></div>
+      </div>
+    </section>
+
+    <!-- parts -->
+    <section data-view="parts" class="hide">
+      <div class="panel">
+        <div class="panel-h"><h2>القطع <span class="muted" id="partsCount" style="font-size:.9rem;font-weight:500"></span></h2>
+          <div style="display:flex;gap:6px"><button class="btn ghost sm" id="exportCsv">تصدير CSV</button><button class="btn sm" data-action="new-part">+ إضافة قطعة</button></div>
+        </div>
+        <div class="toolbar">
+          <input class="input" id="pq" type="search" placeholder="بحث بالاسم أو الرقم أو السيارة">
+          <select class="input" id="pcond"><option value="">كل الحالات</option><option value="new">جديد</option><option value="used">مستعمل</option><option value="scrap">تشليح</option></select>
+          <select class="input" id="pstate"><option value="">الكل</option><option value="active">معروضة</option><option value="hidden">مخفية</option><option value="out">نفدت</option></select>
+        </div>
+        <div class="rows" id="partsList"></div>
+      </div>
+    </section>
+
+    <!-- orders -->
+    <section data-view="orders" class="hide">
+      <div class="panel">
+        <div class="panel-h"><h2>الطلبات</h2>
+          <select class="input" id="ostatus" style="width:auto"><option value="">كل الحالات</option><option value="new">جديد</option><option value="confirmed">مؤكد</option><option value="shipped">تم الشحن</option><option value="done">مكتمل</option><option value="cancelled">ملغي</option></select>
+        </div>
+        <div class="rows" id="ordersList"></div>
+      </div>
+    </section>
+
+    <!-- requests -->
+    <section data-view="requests" class="hide">
+      <div class="panel">
+        <div class="panel-h"><h2>طلبات القطع</h2>
+          <select class="input" id="rstatus" style="width:auto"><option value="">كل الحالات</option><option value="new">جديد</option><option value="quoted">تم التسعير</option><option value="done">مكتمل</option><option value="cancelled">ملغي</option></select>
+        </div>
+        <div class="rows" id="reqsList"></div>
+      </div>
+    </section>
+  </main>
+
+  <button class="btn fab" data-action="new-part">+ قطعة جديدة</button>
+</div>
+
+<!-- part editor -->
+<div class="overlay" id="ov"></div>
+<div class="modal" id="partModal" role="dialog" aria-modal="true">
+  <div class="modal-h"><h2 id="pmTitle">إضافة قطعة</h2><button class="x" data-close aria-label="إغلاق">✕</button></div>
+  <div class="modal-b">
+    <form id="partForm" novalidate>
+      <input type="hidden" name="id">
+      <div class="field"><label>الصور (أول صورة هي الرئيسية)</label>
+        <div class="imgs" id="imgs"></div>
+        <input type="file" id="fileIn" accept="image/*" multiple class="hide">
+      </div>
+      <div class="field"><label>الحالة</label>
+        <div class="seg">
+          <label><input type="radio" name="condition" value="new" checked><span>جديد</span></label>
+          <label><input type="radio" name="condition" value="used"><span>مستعمل</span></label>
+          <label><input type="radio" name="condition" value="scrap"><span>تشليح</span></label>
+        </div>
+      </div>
+      <div class="field"><label>اسم القطعة *</label><input class="input" name="name" required maxlength="140" placeholder="مثال: شمعة أمامية يمين LED"></div>
+      <div class="grid2">
+        <div class="field"><label>رقم القطعة</label><input class="input ltr" name="part_number" maxlength="60" style="text-align:right"></div>
+        <div class="field"><label>الصانع</label><input class="input" name="brand" maxlength="60" list="brandsList" placeholder="Toyota، Denso…"></div>
+      </div>
+      <div class="grid3">
+        <div class="field"><label>السعر (ر.س)</label><input class="input" name="price" type="number" inputmode="decimal" min="0" step="0.01" placeholder="فاضي = عند الطلب"></div>
+        <div class="field"><label>الكمية</label><input class="input" name="stock" type="number" inputmode="numeric" min="0" step="1" value="1"></div>
+        <div class="field"><label>الفئة</label><input class="input" name="category" list="catsList" maxlength="60"></div>
+      </div>
+      <div class="field" id="srcField"><label>السيارة المصدر (للمستعمل والتشليح)</label><input class="input" name="source_vehicle" maxlength="120" placeholder="مثال: كامري 2016 — تشليح"></div>
+      <div class="field"><label>يركب على</label>
+        <div id="fits"></div>
+        <button type="button" class="btn ghost sm" id="addFit">+ إضافة سيارة</button>
+      </div>
+      <div class="field"><label>الوصف (الحالة، الضمان، الملاحظات)</label><textarea class="input" name="description" maxlength="2000"></textarea></div>
+      <label class="switch field"><input type="checkbox" name="is_active" checked> معروضة في الموقع</label>
+      <div class="form-foot">
+        <button class="btn" type="submit" id="saveBtn">حفظ القطعة</button>
+        <button class="btn danger hide" type="button" id="delBtn">حذف</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<datalist id="makesList"></datalist>
+<datalist id="catsList"></datalist>
+<datalist id="brandsList"></datalist>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="db.js"></script>
+<script>
+const {esc, money, norm, CONDITIONS, ICONS} = K;
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const ORDER_ST = {new:"جديد", confirmed:"مؤكد", shipped:"تم الشحن", done:"مكتمل", cancelled:"ملغي"};
+const REQ_ST = {new:"جديد", quoted:"تم التسعير", done:"مكتمل", cancelled:"ملغي"};
+let PARTS = [], ORDERS = [], REQS = [];
+let editImages = [], uploading = 0;
+
+/* ---------- auth ---------- */
+async function boot() {
+  if (!DB.live) { $("#demoBar").classList.remove("hide"); return start(); }
+  const s = await DB.session();
+  if (!s) return showLogin();
+  if (!(await DB.isAdmin())) return showLogin("هذا الحساب ليس له صلاحية مشرف.");
+  $("#who").textContent = s.user.email;
+  start();
+}
+function showLogin(msg) {
+  $("#appView").classList.add("hide"); $("#loginView").classList.remove("hide");
+  if (msg) { $("#loginErr").textContent = msg; $("#loginErr").classList.remove("hide"); }
+}
+$("#loginForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const f = e.target, b = f.querySelector("button");
+  b.disabled = true; b.textContent = "جاري الدخول…"; $("#loginErr").classList.add("hide");
+  try {
+    await DB.signIn(f.email.value.trim(), f.password.value);
+    if (!(await DB.isAdmin())) { await DB.signOut(); throw new Error("هذا الحساب ليس له صلاحية مشرف."); }
+    location.reload();
+  } catch (err) {
+    $("#loginErr").textContent = /Invalid login/i.test(err.message) ? "البريد أو كلمة المرور غير صحيحة." : err.message;
+    $("#loginErr").classList.remove("hide");
+  } finally { b.disabled = false; b.textContent = "دخول"; }
+});
+$("#logout").onclick = async () => { await DB.signOut(); location.reload(); };
+$("#resetDemo").onclick = () => { if (confirm("إعادة البيانات التجريبية ومسح تعديلاتك؟")) { DB.resetDemo(); location.reload(); } };
+
+async function start() {
+  $("#loginView").classList.add("hide"); $("#appView").classList.remove("hide");
+  $("#makesList").innerHTML = K.MAKES.map(m => `<option value="${esc(m)}">`).join("");
+  await loadAll();
+  const t = (location.hash.match(/^#(\w+)/) || [])[1]; if (t) go(t);
+}
+async function loadAll() {
+  try {
+    [PARTS, ORDERS, REQS] = await Promise.all([DB.listAllParts(), DB.listOrders(), DB.listRequests()]);
+  } catch (e) { K.toast("تعذر تحميل البيانات: " + e.message); console.error(e); }
+  const cats = [...new Set([...K.CATEGORIES, ...PARTS.map(p => p.category).filter(Boolean)])];
+  $("#catsList").innerHTML = cats.map(c => `<option value="${esc(c)}">`).join("");
+  $("#brandsList").innerHTML = [...new Set(PARTS.map(p => p.brand).filter(Boolean))].map(c => `<option value="${esc(c)}">`).join("");
+  renderAll();
+}
+function renderAll() { renderStats(); renderParts(); renderOrders(); renderReqs(); renderHome(); }
+
+/* ---------- tabs ---------- */
+function go(tab) {
+  if (!$(`[data-view="${tab}"]`)) return;
+  $$("#tabs button").forEach(b => b.classList.toggle("on", b.dataset.tab === tab));
+  $$("[data-view]").forEach(v => v.classList.toggle("hide", v.dataset.view !== tab));
+  history.replaceState(null, "", "#" + tab);
+  window.scrollTo({top: 0});
+}
+$("#tabs").onclick = e => { const b = e.target.closest("button"); if (b) go(b.dataset.tab); };
+
+/* ---------- home ---------- */
+function renderStats() {
+  const active = PARTS.filter(p => p.is_active).length;
+  const out = PARTS.filter(p => p.stock <= 0).length;
+  const newO = ORDERS.filter(o => o.status === "new").length;
+  const newR = REQS.filter(r => r.status === "new").length;
+  $("#nOrders").textContent = newO; $("#nOrders").classList.toggle("hide", !newO);
+  $("#nReqs").textContent = newR; $("#nReqs").classList.toggle("hide", !newR);
+  $("#stats").innerHTML = [
+    [newO, "طلبات جديدة", "orders", newO > 0], [newR, "طلبات قطع جديدة", "requests", newR > 0],
+    [active, "قطعة معروضة", "parts"], [out, "قطعة نفدت", "parts"]
+  ].map(([n, l, t, a]) => `<div class="stat ${a ? "alert" : ""}" data-goto="${t}"><b>${n.toLocaleString("ar-SA")}</b><span>${l}</span></div>`).join("");
+}
+function renderHome() {
+  const o = ORDERS.slice(0, 5), r = REQS.filter(x => x.status === "new").slice(0, 5);
+  $("#homeOrders").innerHTML = o.length ? o.map(orderCard).join("") : `<div class="empty">لا توجد طلبات بعد</div>`;
+  $("#homeReqs").innerHTML = r.length ? r.map(reqCard).join("") : `<div class="empty">لا توجد طلبات قطع تنتظر رد</div>`;
+}
+
+/* ---------- parts list ---------- */
+function partsFiltered() {
+  const q = norm($("#pq").value), c = $("#pcond").value, s = $("#pstate").value;
+  return PARTS.filter(p => (!c || p.condition === c) &&
+    (!s || (s === "active" && p.is_active) || (s === "hidden" && !p.is_active) || (s === "out" && p.stock <= 0)) &&
+    (!q || norm([p.name, p.part_number, p.brand, p.category, p.source_vehicle, ...(p.fits||[]).map(f => f.make + f.model)].join(" ")).includes(q)));
+}
+function renderParts() {
+  const list = partsFiltered();
+  $("#partsCount").textContent = `(${list.length.toLocaleString("ar-SA")})`;
+  $("#partsList").innerHTML = list.length ? list.slice(0, 300).map(p => `
+    <div class="row ${p.is_active ? "" : "off"}">
+      <div class="ph">${p.images && p.images[0] ? `<img src="${esc(p.images[0])}" alt="" loading="lazy">` : ICONS[p.category] || "🔧"}</div>
+      <div class="info"><b>${esc(p.name)}</b>
+        <div class="meta"><span class="badge ${p.condition}">${CONDITIONS[p.condition]}</span>${p.part_number ? `<span class="pn">${esc(p.part_number)}</span>` : ""}<span>${money(p.price)}</span>
+        <span class="badge ${p.stock <= 0 ? "out" : ""}">${p.stock <= 0 ? "نفدت" : "الكمية " + p.stock}</span>${p.is_active ? "" : `<span class="badge">مخفية</span>`}</div></div>
+      <div class="side">
+        <button class="btn ghost sm" data-toggle="${p.id}">${p.is_active ? "إخفاء" : "إظهار"}</button>
+        <button class="btn sm" data-edit="${p.id}">تعديل</button>
+      </div>
+    </div>`).join("") + (list.length > 300 ? `<div class="empty">يظهر أول 300 — استخدم البحث للوصول لقطعة محددة</div>` : "")
+    : `<div class="empty">لا توجد قطع${PARTS.length ? " مطابقة" : " — أضف أول قطعة"}</div>`;
+}
+["#pq", "#pcond", "#pstate"].forEach(s => $(s).addEventListener("input", renderParts));
+
+/* ---------- orders ---------- */
+const waCustomer = (phone, text) => {
+  let p = String(phone).replace(/[^\d]/g, "");
+  if (p.startsWith("05")) p = "966" + p.slice(1); else if (p.startsWith("5") && p.length === 9) p = "966" + p;
+  return K.wa(text, p);
+};
+function orderCard(o) {
+  const items = (o.items || []).map(i => `<div><span>${esc(i.name)} ${i.part_number ? `<span class="pn muted">${esc(i.part_number)}</span>` : ""} × ${i.qty}</span><span>${money((+i.price || 0) * i.qty)}</span></div>`).join("");
+  return `<div class="order">
+    <div class="order-h"><div><b class="ltr">#${esc(o.code)}</b> · ${esc(o.customer_name)} <span class="badge st-${o.status}">${ORDER_ST[o.status]}</span>
+      <div class="muted" style="font-size:.84rem">${K.date(o.created_at)} · ${esc(o.city)} · <span class="ltr">${esc(o.phone)}</span>${o.vin ? ` · VIN <span class="pn">${esc(o.vin)}</span>` : ""}${o.vehicle ? " · " + esc(o.vehicle) : ""}</div></div>
+      <b>${money(o.total)}</b></div>
+    <div class="items">${items || "<div>بدون قطع</div>"}${o.notes ? `<div style="display:block;margin-top:6px;color:var(--muted)">ملاحظات: ${esc(o.notes)}</div>` : ""}</div>
+    <div class="acts">
+      <select class="input" data-ostatus="${o.id}">${Object.entries(ORDER_ST).map(([k, v]) => `<option value="${k}" ${o.status === k ? "selected" : ""}>${v}</option>`).join("")}</select>
+      <a class="btn wa sm" target="_blank" rel="noopener" href="${waCustomer(o.phone, `السلام عليكم ${o.customer_name}، معك كاسب لقطع الغيار بخصوص طلبك رقم ${o.code}`)}">واتساب العميل</a>
+      <a class="btn ghost sm" href="tel:${esc(o.phone)}">اتصال</a>
+    </div></div>`;
+}
+function renderOrders() {
+  const s = $("#ostatus").value, list = ORDERS.filter(o => !s || o.status === s);
+  $("#ordersList").innerHTML = list.length ? list.map(orderCard).join("") : `<div class="empty">لا توجد طلبات</div>`;
+}
+$("#ostatus").addEventListener("input", renderOrders);
+
+/* ---------- requests ---------- */
+function reqCard(r) {
+  return `<div class="order">
+    <div class="order-h"><div><b>${esc(r.name)}</b> <span class="badge st-${r.status}">${REQ_ST[r.status]}</span>
+      <div class="muted" style="font-size:.84rem">${K.date(r.created_at)}${r.city ? " · " + esc(r.city) : ""} · <span class="ltr">${esc(r.phone)}</span></div></div></div>
+    <div class="items"><div style="display:block"><b>القطعة:</b> ${esc(r.part_text)}</div>${r.vehicle ? `<div style="display:block"><b>السيارة:</b> ${esc(r.vehicle)}</div>` : ""}${r.vin ? `<div style="display:block"><b>VIN:</b> <span class="pn">${esc(r.vin)}</span></div>` : ""}</div>
+    <div class="acts">
+      <select class="input" data-rstatus="${r.id}">${Object.entries(REQ_ST).map(([k, v]) => `<option value="${k}" ${r.status === k ? "selected" : ""}>${v}</option>`).join("")}</select>
+      <a class="btn wa sm" target="_blank" rel="noopener" href="${waCustomer(r.phone, `السلام عليكم ${r.name}، معك كاسب لقطع الغيار بخصوص طلبك: ${r.part_text}`)}">رد واتساب</a>
+      <a class="btn ghost sm" href="tel:${esc(r.phone)}">اتصال</a>
+    </div></div>`;
+}
+function renderReqs() {
+  const s = $("#rstatus").value, list = REQS.filter(r => !s || r.status === s);
+  $("#reqsList").innerHTML = list.length ? list.map(reqCard).join("") : `<div class="empty">لا توجد طلبات قطع</div>`;
+}
+$("#rstatus").addEventListener("input", renderReqs);
+
+document.addEventListener("change", async e => {
+  const os = e.target.dataset.ostatus, rs = e.target.dataset.rstatus;
+  if (!os && !rs) return;
+  try {
+    if (os) { await DB.updateOrder(os, {status: e.target.value}); ORDERS.find(o => o.id === os).status = e.target.value; }
+    if (rs) { await DB.updateRequest(rs, {status: e.target.value}); REQS.find(r => r.id === rs).status = e.target.value; }
+    renderAll(); K.toast("تم تحديث الحالة");
+  } catch (err) { K.toast("تعذر التحديث: " + err.message); }
+});
+
+/* ---------- part editor ---------- */
+function fitRow(f = {}) {
+  return `<div class="fitrow">
+    <input class="input" data-f="make" list="makesList" placeholder="الماركة" value="${esc(f.make)}">
+    <input class="input" data-f="model" placeholder="الموديل" value="${esc(f.model)}">
+    <input class="input" data-f="from" type="number" inputmode="numeric" placeholder="من سنة" min="1970" max="2035" value="${esc(f.from)}">
+    <input class="input" data-f="to" type="number" inputmode="numeric" placeholder="إلى سنة" min="1970" max="2035" value="${esc(f.to)}">
+    <button type="button" class="x" data-rmfit aria-label="حذف">✕</button></div>`;
+}
+function renderImgs() {
+  $("#imgs").innerHTML = editImages.map((u, i) => `<div class="im"><img src="${esc(u)}" alt="">${i === 0 ? `<span class="first">رئيسية</span>` : `<button type="button" data-first="${i}" title="اجعلها الرئيسية" style="left:auto;right:4px">★</button>`}<button type="button" data-rmimg="${i}" aria-label="حذف الصورة">✕</button></div>`).join("") +
+    Array.from({length: uploading}, () => `<div class="im loading"></div>`).join("") +
+    `<label class="add-img" for="fileIn">📷<br>إضافة صور</label>`;
+}
+function openEditor(id) {
+  const f = $("#partForm"); f.reset();
+  const p = id ? PARTS.find(x => x.id === id) : {condition: "new", stock: 1, is_active: true, fits: []};
+  $("#pmTitle").textContent = id ? "تعديل القطعة" : "إضافة قطعة";
+  f.id.value = p.id || "";
+  ["name", "part_number", "brand", "category", "source_vehicle", "description"].forEach(k => f[k].value = p[k] || "");
+  f.price.value = p.price ?? ""; f.stock.value = p.stock ?? 1;
+  f.querySelector(`[name=condition][value=${p.condition}]`).checked = true;
+  f.is_active.checked = p.is_active !== false;
+  editImages = [...(p.images || [])]; uploading = 0; renderImgs();
+  $("#fits").innerHTML = (p.fits && p.fits.length ? p.fits : [{}]).map(fitRow).join("");
+  $("#delBtn").classList.toggle("hide", !id);
+  toggleSrc();
+  $("#partModal").classList.add("on"); $("#ov").classList.add("on"); document.body.style.overflow = "hidden";
+  $("#partModal").scrollTop = 0;
+}
+function closeEditor() {
+  if (uploading && !confirm("فيه صور قيد الرفع، تبي تقفل؟")) return;
+  $("#partModal").classList.remove("on"); $("#ov").classList.remove("on"); document.body.style.overflow = "";
+}
+function toggleSrc() { $("#srcField").classList.toggle("hide", $("#partForm").condition.value === "new"); }
+$$("[name=condition]").forEach(r => r.addEventListener("change", () => {
+  toggleSrc();
+  const s = $("#partForm").stock; if ($("#partForm").condition.value !== "new" && (!s.value || +s.value > 1)) s.value = 1;
+}));
+$("#addFit").onclick = () => { $("#fits").insertAdjacentHTML("beforeend", fitRow()); };
+$("#fileIn").addEventListener("change", async e => {
+  const files = [...e.target.files]; e.target.value = "";
+  uploading += files.length; renderImgs();
+  for (const file of files) {
+    try { editImages.push(await DB.uploadImage(file)); }
+    catch (err) { K.toast("تعذر رفع صورة: " + err.message); }
+    finally { uploading--; renderImgs(); }
+  }
+});
+$("#partForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  if (uploading) { K.toast("انتظر حتى تكتمل الصور"); return; }
+  const f = e.target;
+  if (!f.name.value.trim()) { K.toast("اكتب اسم القطعة"); f.name.focus(); return; }
+  const fits = $$("#fits .fitrow").map(r => {
+    const g = k => r.querySelector(`[data-f=${k}]`).value.trim();
+    const from = g("from") ? +g("from") : null, to = g("to") ? +g("to") : from;
+    return {make: g("make"), model: g("model"), from, to: to && from && to < from ? from : to};
+  }).filter(x => x.make || x.model);
+  const row = {
+    name: f.name.value.trim(), part_number: f.part_number.value.trim() || null, brand: f.brand.value.trim() || null,
+    category: f.category.value.trim() || null, condition: f.condition.value, price: f.price.value, stock: f.stock.value || 0,
+    source_vehicle: f.condition.value === "new" ? null : (f.source_vehicle.value.trim() || null),
+    description: f.description.value.trim() || null, fits, images: editImages, is_active: f.is_active.checked
+  };
+  if (f.id.value) row.id = f.id.value;
+  const b = $("#saveBtn"); b.disabled = true; b.textContent = "جاري الحفظ…";
+  try {
+    const saved = await DB.savePart(row);
+    const i = PARTS.findIndex(p => p.id === saved.id);
+    if (i >= 0) PARTS[i] = saved; else PARTS.unshift(saved);
+    renderAll(); closeEditor(); K.toast("تم حفظ القطعة ✓");
+  } catch (err) { K.toast("تعذر الحفظ: " + err.message); console.error(err); }
+  finally { b.disabled = false; b.textContent = "حفظ القطعة"; }
+});
+$("#delBtn").onclick = async () => {
+  const id = $("#partForm").id.value; if (!id || !confirm("حذف القطعة نهائياً؟ (للإخفاء المؤقت استخدم زر الإخفاء)")) return;
+  try { await DB.deletePart(id); PARTS = PARTS.filter(p => p.id !== id); renderAll(); closeEditor(); K.toast("تم الحذف"); }
+  catch (err) { K.toast("تعذر الحذف: " + err.message); }
+};
+
+/* ---------- export ---------- */
+$("#exportCsv").onclick = () => {
+  const cols = ["name", "part_number", "brand", "category", "condition", "price", "stock", "source_vehicle", "is_active"];
+  const q = v => `"${String(v ?? "").replace(/"/g, '""')}"`;
+  const csv = "﻿" + [cols.concat("fits").join(","), ...PARTS.map(p => cols.map(c => q(c === "condition" ? CONDITIONS[p[c]] : p[c])).concat(q((p.fits || []).map(f => `${f.make} ${f.model} ${f.from || ""}-${f.to || ""}`).join(" | "))).join(","))].join("\n");
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], {type: "text/csv"})); a.download = `kassep-parts-${new Date().toISOString().slice(0, 10)}.csv`; a.click();
+};
+
+/* ---------- global clicks ---------- */
+document.addEventListener("click", async e => {
+  const t = e.target;
+  if (t.closest("[data-close]") || t === $("#ov")) return closeEditor();
+  const a = t.closest("[data-action=new-part]"); if (a) return openEditor();
+  const ed = t.closest("[data-edit]"); if (ed) return openEditor(ed.dataset.edit);
+  const g = t.closest("[data-goto]"); if (g) return go(g.dataset.goto);
+  const rm = t.closest("[data-rmfit]"); if (rm) { rm.parentElement.remove(); if (!$$("#fits .fitrow").length) $("#addFit").click(); return; }
+  const ri = t.closest("[data-rmimg]"); if (ri) { editImages.splice(+ri.dataset.rmimg, 1); return renderImgs(); }
+  const fi = t.closest("[data-first]"); if (fi) { const [x] = editImages.splice(+fi.dataset.first, 1); editImages.unshift(x); return renderImgs(); }
+  const tg = t.closest("[data-toggle]");
+  if (tg) {
+    const p = PARTS.find(x => x.id === tg.dataset.toggle);
+    try { const s = await DB.savePart({...p, is_active: !p.is_active}); Object.assign(p, s); renderAll(); K.toast(p.is_active ? "القطعة معروضة" : "القطعة مخفية"); }
+    catch (err) { K.toast("تعذر التحديث: " + err.message); }
+  }
+});
+document.addEventListener("keydown", e => { if (e.key === "Escape" && $("#partModal").classList.contains("on")) closeEditor(); });
+
+boot();
+</script>
+</body>
+</html>

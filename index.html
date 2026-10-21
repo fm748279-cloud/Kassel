@@ -1,0 +1,609 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>كاسب | قطع غيار جديدة ومستعملة وتشليح</title>
+<meta name="description" content="كاسب لقطع الغيار: ابحث بسيارتك أو برقم القطعة عن قطع جديدة ومستعملة وتشليح، واطلب مباشرة.">
+<meta property="og:title" content="كاسب لقطع الغيار">
+<meta property="og:description" content="قطع جديدة ومستعملة وتشليح — ابحث بسيارتك واطلب مباشرة">
+<meta name="theme-color" content="#111418">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%23e8590c'/><text x='32' y='45' font-size='36' text-anchor='middle' fill='white' font-family='Arial'>ك</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+/* header */
+.top{position:sticky;top:0;z-index:30;background:var(--ink);color:var(--ink-text)}
+.top .bar{display:flex;align-items:center;justify-content:space-between;height:64px;gap:12px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit}
+.logo .mark{width:38px;height:38px;border-radius:11px;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:700;font-size:1.2rem}
+.logo b{display:block;font-size:1.25rem;line-height:1.1}
+.logo small{display:block;font-size:.7rem;color:var(--ink-muted);letter-spacing:.06em}
+.nav{display:flex;gap:6px;align-items:center}
+.nav a.link{color:var(--ink-muted);text-decoration:none;padding:8px 10px;border-radius:10px;font-size:.92rem}
+.nav a.link:hover{color:#fff;background:rgba(255,255,255,.06)}
+.cart-btn{display:flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);color:#fff;border-radius:12px;padding:8px 12px;cursor:pointer;font-weight:600}
+.cart-btn .count{background:var(--brand);color:#fff;border-radius:99px;min-width:22px;height:22px;font-size:.78rem;display:grid;place-items:center;padding:0 6px}
+
+/* hero */
+.hero{background:var(--ink);color:var(--ink-text);padding:26px 0 70px;position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;inset:auto -10% -60% auto;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,rgba(232,89,12,.28),transparent 65%);pointer-events:none}
+.hero h1{margin:0 0 6px;font-size:clamp(1.55rem,4.6vw,2.4rem);line-height:1.3;max-width:640px}
+.hero h1 em{font-style:normal;color:var(--brand)}
+.hero p{margin:0;color:var(--ink-muted);max-width:560px}
+.trust{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:14px;color:var(--ink-muted);font-size:.86rem}
+.trust span::before{content:"✓ ";color:var(--brand);font-weight:700}
+
+/* search box */
+.finder{position:relative;z-index:2;margin-top:-48px}
+.finder-card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:16px;box-shadow:var(--shadow)}
+.seg{display:flex;background:var(--soft);border-radius:12px;padding:4px;gap:4px;margin-bottom:12px;overflow-x:auto}
+.seg button{flex:1;border:0;background:transparent;border-radius:9px;padding:8px 10px;cursor:pointer;font-weight:600;color:var(--muted);white-space:nowrap}
+.seg button.on{background:var(--card);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.qrow{display:flex;gap:8px}
+.qrow .input{font-size:1rem;padding:13px 14px}
+.qrow .input:first-child{flex:1;min-width:0}
+.car{display:grid;grid-template-columns:repeat(3,1fr) auto;gap:8px;margin-top:10px}
+
+/* sections */
+.section{padding:22px 0 8px}
+.section-h{display:flex;justify-content:space-between;align-items:end;gap:12px;margin-bottom:12px}
+.section-h h2{margin:0;font-size:1.2rem}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 12px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--line);background:var(--card);border-radius:99px;padding:6px 14px;cursor:pointer;font-size:.9rem}
+.chip.on{background:var(--text);border-color:var(--text);color:var(--bg)}
+
+/* cards */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--shadow);cursor:pointer;transition:transform .15s,border-color .15s}
+.card:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--brand) 40%,var(--line))}
+.thumb{aspect-ratio:4/3;background:var(--soft);display:grid;place-items:center;font-size:2.6rem;position:relative}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.thumb .badge{position:absolute;top:10px;right:10px}
+.thumb .count-img{position:absolute;bottom:8px;left:8px;background:rgba(0,0,0,.6);color:#fff;font-size:.72rem;border-radius:6px;padding:1px 7px}
+.card .body{padding:12px 14px 14px;display:flex;flex-direction:column;gap:6px;flex:1}
+.card h3{margin:0;font-size:.98rem;line-height:1.45}
+.pn{font-family:ui-monospace,SFMono-Regular,monospace;font-size:.78rem;color:var(--muted);direction:ltr;text-align:right}
+.fit{font-size:.8rem;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card .foot{margin-top:auto;display:flex;justify-content:space-between;align-items:center;gap:8px;padding-top:10px}
+.price{font-weight:700;font-size:1.08rem}
+.add{border:0;background:var(--brand);color:#fff;border-radius:10px;padding:7px 12px;font-weight:600;cursor:pointer;font-size:.88rem}
+.add.in{background:var(--new-soft);color:var(--new)}
+.add:disabled{background:var(--soft);color:var(--muted);cursor:not-allowed}
+.more{display:flex;justify-content:center;margin:18px 0 6px}
+
+.empty{grid-column:1/-1;text-align:center;background:var(--card);border:1px dashed var(--line);border-radius:var(--radius);padding:34px 16px}
+.empty h3{margin:0 0 6px}
+.empty p{color:var(--muted);margin:0 0 16px}
+.skeleton{height:300px;border-radius:var(--radius);background:linear-gradient(90deg,var(--soft),var(--card),var(--soft));background-size:200% 100%;animation:sh 1.2s infinite}
+@keyframes sh{to{background-position:-200% 0}}
+
+/* request band */
+.band{margin:30px 0;background:var(--ink);color:var(--ink-text);border-radius:22px;padding:24px;display:grid;grid-template-columns:1.2fr 1fr;gap:20px;align-items:center}
+.band h2{margin:0 0 6px;font-size:1.35rem}
+.band p{margin:0;color:var(--ink-muted)}
+.band .steps{display:grid;gap:10px}
+.band .step{display:flex;gap:12px;align-items:center;background:rgba(255,255,255,.05);border-radius:12px;padding:10px 12px;font-size:.92rem}
+.band .step b{width:28px;height:28px;flex:none;border-radius:8px;background:var(--brand);display:grid;place-items:center}
+
+/* conditions explainer */
+.conds{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.cond{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;cursor:pointer}
+.cond .badge{margin-bottom:8px}
+.cond h3{margin:0 0 4px;font-size:1rem}
+.cond p{margin:0;color:var(--muted);font-size:.88rem}
+
+/* part modal */
+.pm{display:grid;grid-template-columns:1.1fr 1fr;gap:20px}
+.gallery .main{aspect-ratio:4/3;background:var(--soft);border-radius:14px;overflow:hidden;display:grid;place-items:center;font-size:4rem}
+.gallery .main img{width:100%;height:100%;object-fit:contain;background:#000}
+.gallery .thumbs{display:flex;gap:8px;margin-top:8px;overflow-x:auto}
+.gallery .thumbs img{width:64px;height:52px;object-fit:cover;border-radius:8px;cursor:pointer;border:2px solid transparent;flex:none}
+.gallery .thumbs img.on{border-color:var(--brand)}
+.pm h3{margin:0 0 4px;font-size:1.25rem}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:.9rem;margin:12px 0}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0}
+.fits{list-style:none;padding:0;margin:6px 0 0;display:flex;flex-wrap:wrap;gap:6px}
+.fits li{background:var(--soft);border-radius:8px;padding:3px 9px;font-size:.84rem}
+.pm .desc{white-space:pre-line;font-size:.92rem;background:var(--soft);border-radius:12px;padding:10px 12px;margin:10px 0}
+.pm .actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+
+/* cart lines */
+.line{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.line .ph{width:46px;height:46px;border-radius:10px;background:var(--soft);display:grid;place-items:center;overflow:hidden;flex:none}
+.line .ph img{width:100%;height:100%;object-fit:cover}
+.line .info{flex:1;min-width:0}
+.line .info b{display:block;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qty{display:flex;align-items:center;border:1px solid var(--line);border-radius:10px}
+.qty button{border:0;background:none;width:30px;height:30px;cursor:pointer;font-size:1rem}
+.qty span{min-width:20px;text-align:center}
+.total{display:flex;justify-content:space-between;font-weight:700;font-size:1.08rem;margin:14px 0 4px}
+.note{font-size:.8rem;color:var(--muted);text-align:center}
+.done{text-align:center;padding:20px 0}
+.done .ok{width:64px;height:64px;border-radius:50%;background:var(--new-soft);color:var(--new);display:grid;place-items:center;font-size:2rem;margin:0 auto 12px}
+.done .code{font-family:ui-monospace,monospace;font-size:1.2rem;font-weight:700;letter-spacing:.08em;background:var(--soft);display:inline-block;padding:4px 12px;border-radius:8px;margin:6px 0 14px}
+
+/* footer */
+footer{background:var(--ink);color:var(--ink-muted);margin-top:40px;padding:28px 0 90px;font-size:.9rem}
+footer .cols{display:grid;grid-template-columns:2fr 1fr 1fr;gap:20px}
+footer h4{color:var(--ink-text);margin:0 0 8px;font-size:.95rem}
+footer a{color:var(--ink-muted);text-decoration:none;display:block;padding:2px 0}
+footer a:hover{color:#fff}
+.fab{position:fixed;bottom:18px;right:18px;z-index:40;width:56px;height:56px;border-radius:50%;background:#1fa855;color:#fff;display:grid;place-items:center;box-shadow:0 8px 24px rgba(0,0,0,.25);text-decoration:none}
+.fab svg{width:28px;height:28px}
+.demo{background:var(--scrap-soft);color:var(--scrap);text-align:center;font-size:.82rem;padding:6px 16px}
+
+@media (max-width:820px){
+  .nav a.link{display:none}
+  .car{grid-template-columns:1fr 1fr 1fr}
+  .car .btn{grid-column:1/-1}
+  .band{grid-template-columns:1fr}
+  .pm{grid-template-columns:1fr}
+  .conds{grid-template-columns:1fr}
+  footer .cols{grid-template-columns:1fr 1fr}
+  footer .cols>div:first-child{grid-column:1/-1}
+}
+@media (max-width:520px){
+  .grid{grid-template-columns:1fr 1fr;gap:10px}
+  .card .body{padding:10px}
+  .card h3{font-size:.9rem}
+  .card .foot{flex-direction:column;align-items:stretch}
+  .add{width:100%}
+  .fit{display:none}
+  .car{grid-template-columns:1fr 1fr}
+  .car select:nth-child(3){grid-column:1/-1}
+  .cart-btn .lbl{display:none}
+  .qrow .btn{padding:0 14px}
+}
+</style>
+</head>
+<body>
+
+<div class="demo hide" id="demoBar">وضع تجريبي — البيانات للعرض فقط حتى يتم ربط قاعدة البيانات</div>
+
+<header class="top">
+  <div class="wrap bar">
+    <a class="logo" href="./"><span class="mark">ك</span><span><b>كاسب</b><small>KASSEP AUTO PARTS</small></span></a>
+    <nav class="nav">
+      <a class="link" href="#parts">القطع</a>
+      <a class="link" href="#" data-cond="scrap">التشليح</a>
+      <a class="link" href="#request">اطلب قطعة</a>
+      <button class="cart-btn" id="openCart" aria-label="سلة الطلب">🛒 <span class="lbl">السلة</span> <span class="count" id="cartCount">0</span></button>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <h1>قطعة سيارتك موجودة في <em>كاسب</em> — جديدة، مستعملة، أو تشليح</h1>
+    <p>ابحث برقم القطعة أو اختر سيارتك، وأرسل طلبك مباشرة. نأكد لك التوافق والسعر قبل الدفع.</p>
+    <div class="trust"><span>تأكيد التوافق برقم الهيكل</span><span>قطع مفحوصة ومجرّبة</span><span>توصيل لجميع المدن</span></div>
+  </div>
+</section>
+
+<div class="wrap finder">
+  <div class="finder-card">
+    <div class="seg" id="seg">
+      <button data-v="" class="on">الكل</button>
+      <button data-v="new">جديد</button>
+      <button data-v="used">مستعمل</button>
+      <button data-v="scrap">تشليح</button>
+    </div>
+    <div class="qrow">
+      <input class="input" id="q" type="search" placeholder="اسم القطعة أو رقمها — مثال: كمبروسر مكيف" autocomplete="off" enterkeyhint="search">
+      <select class="input" id="sort" style="flex:none;width:auto" aria-label="الترتيب">
+        <option value="new">الأحدث</option>
+        <option value="low">الأقل سعراً</option>
+        <option value="high">الأعلى سعراً</option>
+      </select>
+    </div>
+    <div class="car">
+      <select class="input" id="make" aria-label="الماركة"><option value="">الماركة</option></select>
+      <select class="input" id="model" aria-label="الموديل"><option value="">الموديل</option></select>
+      <select class="input" id="year" aria-label="السنة"><option value="">السنة</option></select>
+      <button class="btn ghost" id="reset" type="button">مسح البحث</button>
+    </div>
+  </div>
+</div>
+
+<main class="wrap">
+  <section class="section" id="parts">
+    <div class="chips" id="chips"></div>
+    <div class="section-h"><h2 id="resTitle">أحدث القطع</h2><span class="muted" id="resCount"></span></div>
+    <div class="grid" id="grid">
+      <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
+    </div>
+    <div class="more hide" id="moreWrap"><button class="btn ghost" id="more">عرض المزيد</button></div>
+  </section>
+
+  <section class="section">
+    <div class="section-h"><h2>وش الفرق بين الحالات؟</h2></div>
+    <div class="conds">
+      <div class="cond" data-cond="new"><span class="badge new">جديد</span><h3>قطع جديدة</h3><p>أصلية أو بديلة معتمدة، بكرتونها وضمان الوكيل أو المصنع.</p></div>
+      <div class="cond" data-cond="used"><span class="badge used">مستعمل</span><h3>مستعمل مفحوص</h3><p>قطع مستعملة بحالة جيدة، مفحوصة ومجرّبة قبل البيع، مع صور حقيقية.</p></div>
+      <div class="cond" data-cond="scrap"><span class="badge scrap">تشليح</span><h3>تشليح بأسعار أقل</h3><p>من سيارات مفككة لدينا، مع ذكر السيارة المصدر وضمان تركيب.</p></div>
+    </div>
+  </section>
+
+  <section class="band" id="request">
+    <div>
+      <h2>ما لقيت قطعتك؟ نوفرها لك</h2>
+      <p>اكتب القطعة وسيارتك، ونرجع لك بالسعر والتوفر في أسرع وقت.</p>
+      <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" id="openRequest">اطلب قطعة</button>
+        <a class="btn wa" id="waBand" target="_blank" rel="noopener">أرسل صورة القطعة واتساب</a>
+      </div>
+    </div>
+    <div class="steps">
+      <div class="step"><b>1</b>اكتب اسم القطعة وسيارتك أو رقم الهيكل</div>
+      <div class="step"><b>2</b>نبحث في مخزوننا والتشليح والموردين</div>
+      <div class="step"><b>3</b>نرسل لك السعر وصور القطعة قبل الدفع</div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap cols">
+    <div>
+      <a class="logo" href="./" style="margin-bottom:10px"><span class="mark">ك</span><span><b style="color:#fff">كاسب</b><small>KASSEP AUTO PARTS</small></span></a>
+      <p style="margin:0;max-width:340px">قطع غيار جديدة ومستعملة وتشليح لجميع السيارات، مع تأكيد التوافق قبل البيع.</p>
+    </div>
+    <div><h4>تسوّق</h4><a href="#" data-cond="new">قطع جديدة</a><a href="#" data-cond="used">مستعمل</a><a href="#" data-cond="scrap">تشليح</a><a href="#request">اطلب قطعة</a></div>
+    <div id="contact"><h4>تواصل</h4></div>
+  </div>
+  <div class="wrap" style="margin-top:20px;font-size:.8rem">© <span id="yr"></span> كاسب لقطع الغيار · kassep.com</div>
+</footer>
+
+<a class="fab" id="fab" target="_blank" rel="noopener" aria-label="تواصل واتساب">
+  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.1-1.8-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.8 1-.9 1.2-.2.2-.3.2-.6.1-.3-.1-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6l.4-.5c.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5l-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.2-.3-.3-.6-.4zM12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.3c-1.5 0-3-.4-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.3 8.3 0 1 1 12 20.3z"/></svg>
+</a>
+
+<!-- part modal -->
+<div class="overlay" id="ov"></div>
+<div class="modal" id="partModal" role="dialog" aria-modal="true">
+  <div class="modal-h"><h2>تفاصيل القطعة</h2><button class="x" data-close aria-label="إغلاق">✕</button></div>
+  <div class="modal-b" id="partBody"></div>
+</div>
+
+<!-- request modal -->
+<div class="modal" id="reqModal" role="dialog" aria-modal="true">
+  <div class="modal-h"><h2>اطلب قطعة</h2><button class="x" data-close aria-label="إغلاق">✕</button></div>
+  <div class="modal-b" id="reqBody">
+    <form id="reqForm" novalidate>
+      <div class="field"><label>القطعة المطلوبة *</label><textarea class="input" name="part_text" required maxlength="1000" placeholder="مثال: شمعة أمامية يمين LED"></textarea></div>
+      <div class="field"><label>السيارة (الماركة والموديل والسنة)</label><input class="input" name="vehicle" maxlength="120" placeholder="مثال: كامري 2019"></div>
+      <div class="field"><label>رقم الهيكل VIN (يسرّع الرد)</label><input class="input ltr" name="vin" maxlength="17" style="text-align:right"></div>
+      <div class="grid2">
+        <div class="field"><label>الاسم *</label><input class="input" name="name" required maxlength="80" autocomplete="name"></div>
+        <div class="field"><label>الجوال *</label><input class="input" name="phone" type="tel" inputmode="tel" required maxlength="20" placeholder="05xxxxxxxx" autocomplete="tel"></div>
+      </div>
+      <div class="field"><label>المدينة</label><input class="input" name="city" maxlength="60"></div>
+      <button class="btn block" type="submit">إرسال الطلب</button>
+      <p class="note" style="margin-top:8px">عندك صورة للقطعة؟ بعد الإرسال تقدر ترسلها لنا على واتساب.</p>
+    </form>
+  </div>
+</div>
+
+<!-- cart drawer -->
+<aside class="drawer" id="drawer" aria-label="سلة الطلب">
+  <div class="modal-h"><h2>سلة الطلب</h2><button class="x" data-close aria-label="إغلاق">✕</button></div>
+  <div class="modal-b" id="cartBody">
+    <div id="lines"></div>
+    <div class="total" id="totalRow"><span>الإجمالي التقديري</span><span id="total"></span></div>
+    <p class="note" id="vatNote"></p>
+    <form id="orderForm" novalidate>
+      <h3 style="margin:18px 0 10px;font-size:1rem">بيانات التوصيل</h3>
+      <div class="field"><label>الاسم *</label><input class="input" name="customer_name" required maxlength="80" autocomplete="name"></div>
+      <div class="grid2">
+        <div class="field"><label>الجوال *</label><input class="input" name="phone" type="tel" inputmode="tel" required maxlength="20" placeholder="05xxxxxxxx" autocomplete="tel"></div>
+        <div class="field"><label>المدينة *</label><input class="input" name="city" required maxlength="60"></div>
+      </div>
+      <div class="field"><label>رقم الهيكل VIN (اختياري — يضمن التوافق)</label><input class="input ltr" name="vin" maxlength="17" style="text-align:right"></div>
+      <div class="field"><label>ملاحظات</label><textarea class="input" name="notes" maxlength="1000"></textarea></div>
+    </form>
+  </div>
+  <div class="drawer-f" id="cartFoot">
+    <button class="btn" id="submitOrder">تأكيد الطلب</button>
+    <p class="note" style="margin:0">يتواصل معك فريق كاسب لتأكيد التوافق والسعر النهائي قبل الدفع.</p>
+  </div>
+</aside>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="db.js"></script>
+<script>
+const {esc, money, norm, CONDITIONS, ICONS} = K;
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const PAGE = 24;
+const state = {q:"", cond:"", make:"", model:"", year:"", cat:"", sort:"new", limit:PAGE};
+let PARTS = [];
+let cart = (() => { try { return JSON.parse(localStorage.getItem("kassep_cart") || "{}"); } catch (e) { return {}; } })();
+const saveCart = () => { try { localStorage.setItem("kassep_cart", JSON.stringify(cart)); } catch (e) {} };
+
+/* ---------- filters ---------- */
+const uniq = a => [...new Set(a)].filter(Boolean);
+function fill(el, items, label) {
+  const cur = el.value;
+  el.innerHTML = `<option value="">${label}</option>` + items.map(i => `<option>${esc(i)}</option>`).join("");
+  el.value = items.map(String).includes(cur) ? cur : "";
+}
+function refreshCarSelects() {
+  const all = PARTS.flatMap(p => p.fits || []);
+  fill($("#make"), uniq(all.map(f => f.make)).sort((a,b)=>a.localeCompare(b,"ar")), "الماركة");
+  state.make = $("#make").value;
+  const m = all.filter(f => !state.make || f.make === state.make);
+  fill($("#model"), uniq(m.map(f => f.model)).sort((a,b)=>a.localeCompare(b,"ar")), "الموديل");
+  state.model = $("#model").value;
+  const y = m.filter(f => !state.model || f.model === state.model);
+  const years = uniq(y.flatMap(f => { const r = []; for (let i = +f.from; i <= +f.to && r.length < 60; i++) r.push(i); return r; })).sort((a,b)=>b-a);
+  fill($("#year"), years, "السنة");
+  state.year = $("#year").value;
+}
+const fitsCar = p => (!state.make && !state.model && !state.year) ||
+  (p.fits || []).some(f => (!state.make || f.make === state.make) && (!state.model || f.model === state.model) && (!state.year || (+state.year >= +f.from && +state.year <= +f.to)));
+function score(p) {
+  if (!state.q.trim()) return 1;
+  const q = norm(state.q), pn = norm(p.part_number);
+  if (pn && pn === q) return 100;
+  if (pn && q.length >= 3 && pn.includes(q)) return 60;
+  const hay = norm([p.name, p.part_number, p.brand, p.category, p.source_vehicle, CONDITIONS[p.condition], ...(p.fits||[]).map(f => f.make + f.model)].join(" "));
+  return state.q.trim().split(/\s+/).map(norm).filter(Boolean).every(t => hay.includes(t)) ? 10 : 0;
+}
+function results() {
+  const r = PARTS.filter(p => (!state.cond || p.condition === state.cond) && (!state.cat || p.category === state.cat) && fitsCar(p))
+    .map(p => ({p, s: score(p)})).filter(x => x.s > 0);
+  const price = p => p.price == null ? Infinity : +p.price;
+  r.sort((a, b) => state.sort === "low" ? price(a.p) - price(b.p) : state.sort === "high" ? (+b.p.price||0) - (+a.p.price||0) : (b.s - a.s) || (new Date(b.p.created_at) - new Date(a.p.created_at)));
+  return r.map(x => x.p);
+}
+
+/* ---------- render ---------- */
+const stockBadge = p => p.stock <= 0 ? `<span class="badge out">نفدت</span>` : p.stock <= 2 && p.condition === "new" ? `<span class="badge low">باقي ${p.stock}</span>` : "";
+const yrs = f => f.from ? "\u2066" + f.from + (f.to && f.to != f.from ? "–" + f.to : "") + "\u2069" : "";
+const fitText = p => (p.fits || []).slice(0, 2).map(f => `${f.make} ${f.model} ${yrs(f)}`).join("، ") + ((p.fits||[]).length > 2 ? ` +${p.fits.length - 2}` : "");
+const thumb = (p, cls = "") => p.images && p.images[0] ? `<img src="${esc(p.images[0])}" alt="${esc(p.name)}" loading="lazy" ${cls}>` : `<span aria-hidden="true">${ICONS[p.category] || "🔧"}</span>`;
+
+function renderChips() {
+  const cats = uniq(PARTS.filter(p => !state.cond || p.condition === state.cond).map(p => p.category));
+  $("#chips").innerHTML = [["", "كل الفئات"], ...cats.map(c => [c, (ICONS[c] || "🔧") + " " + c])]
+    .map(([v, l]) => `<button class="chip ${state.cat === v ? "on" : ""}" data-cat="${esc(v)}">${esc(l)}</button>`).join("");
+}
+function renderGrid() {
+  const list = results();
+  const filtered = state.q || state.cond || state.make || state.cat;
+  $("#resTitle").textContent = filtered ? "نتائج البحث" : "أحدث القطع";
+  $("#resCount").textContent = `${list.length.toLocaleString("ar-SA")} قطعة`;
+  if (!list.length) {
+    $("#grid").innerHTML = `<div class="empty"><h3>ما لقينا القطعة في المعروض</h3><p>كثير من القطع عندنا ما تكون معروضة بعد. أرسل طلبك ونرد عليك بالسعر.</p><button class="btn" data-action="request-from-search">اطلب هذي القطعة</button></div>`;
+    $("#moreWrap").classList.add("hide");
+    return;
+  }
+  $("#grid").innerHTML = list.slice(0, state.limit).map(p => {
+    const n = cart[p.id] || 0;
+    return `<article class="card" data-id="${p.id}">
+      <div class="thumb">${thumb(p)}<span class="badge ${p.condition}">${CONDITIONS[p.condition]}</span>${(p.images||[]).length > 1 ? `<span class="count-img">📷 ${p.images.length}</span>` : ""}</div>
+      <div class="body">
+        <h3>${esc(p.name)}</h3>
+        ${p.part_number ? `<div class="pn">${esc(p.part_number)}</div>` : ""}
+        <div class="fit">${p.source_vehicle && p.condition !== "new" ? "من: " + esc(p.source_vehicle) + " · " : ""}${esc(fitText(p))}</div>
+        <div class="foot">
+          <div class="price">${money(p.price)}</div>
+          <button class="add ${n ? "in" : ""}" data-add="${p.id}" ${p.stock <= 0 ? "disabled" : ""}>${p.stock <= 0 ? "نفدت" : n ? `✓ بالسلة` : "أضف للسلة"}</button>
+        </div>
+      </div>
+    </article>`;
+  }).join("");
+  $("#moreWrap").classList.toggle("hide", list.length <= state.limit);
+}
+function renderCart() {
+  const ids = Object.keys(cart).filter(id => PARTS.some(p => p.id === id));
+  Object.keys(cart).forEach(id => { if (!ids.includes(id) && PARTS.length) delete cart[id]; });
+  $("#cartCount").textContent = ids.reduce((s, id) => s + cart[id], 0);
+  if (!ids.length) {
+    $("#lines").innerHTML = `<div class="empty" style="padding:22px 12px"><h3 style="font-size:1rem">السلة فاضية</h3><p style="margin:0">أضف قطع من القائمة، أو <a href="#" data-action="request">اطلب قطعة غير موجودة</a>.</p></div>`;
+    $("#totalRow").classList.add("hide"); $("#vatNote").textContent = "";
+    $("#orderForm").classList.add("hide"); $("#cartFoot").classList.add("hide");
+  } else {
+    $("#lines").innerHTML = ids.map(id => {
+      const p = PARTS.find(x => x.id === id);
+      return `<div class="line"><div class="ph">${thumb(p)}</div><div class="info"><b>${esc(p.name)}</b><span class="badge ${p.condition}">${CONDITIONS[p.condition]}</span> <span class="muted" style="font-size:.82rem">${money(p.price)}</span></div>
+        <div class="qty"><button data-dec="${id}" aria-label="إنقاص">−</button><span>${cart[id]}</span><button data-inc="${id}" aria-label="زيادة">+</button></div></div>`;
+    }).join("");
+    const total = ids.reduce((s, id) => s + (+PARTS.find(x => x.id === id).price || 0) * cart[id], 0);
+    const anyNoPrice = ids.some(id => PARTS.find(x => x.id === id).price == null);
+    $("#total").textContent = money(total) + (anyNoPrice ? " +" : "");
+    $("#vatNote").textContent = K.C.vatIncluded ? "الأسعار شاملة ضريبة القيمة المضافة، والشحن يُحدد حسب المدينة." : "";
+    $("#totalRow").classList.remove("hide"); $("#orderForm").classList.remove("hide"); $("#cartFoot").classList.remove("hide");
+  }
+  saveCart();
+}
+function renderAll() { renderChips(); renderGrid(); renderCart(); }
+
+/* ---------- part modal ---------- */
+function openPart(id, push = true) {
+  const p = PARTS.find(x => x.id === id); if (!p) return;
+  const imgs = p.images || [];
+  const n = cart[p.id] || 0;
+  $("#partBody").innerHTML = `<div class="pm">
+    <div class="gallery">
+      <div class="main" id="gMain">${imgs[0] ? `<img src="${esc(imgs[0])}" alt="${esc(p.name)}">` : `<span>${ICONS[p.category] || "🔧"}</span>`}</div>
+      ${imgs.length > 1 ? `<div class="thumbs">${imgs.map((u, i) => `<img src="${esc(u)}" data-g="${i}" class="${i ? "" : "on"}" alt="">`).join("")}</div>` : ""}
+    </div>
+    <div>
+      <div style="display:flex;gap:6px;margin-bottom:6px"><span class="badge ${p.condition}">${CONDITIONS[p.condition]}</span>${stockBadge(p)}</div>
+      <h3>${esc(p.name)}</h3>
+      <div class="price" style="font-size:1.4rem">${money(p.price)}</div>
+      <dl class="kv">
+        ${p.part_number ? `<dt>رقم القطعة</dt><dd class="pn" style="font-size:.9rem">${esc(p.part_number)}</dd>` : ""}
+        ${p.brand ? `<dt>الصانع</dt><dd>${esc(p.brand)}</dd>` : ""}
+        ${p.category ? `<dt>الفئة</dt><dd>${esc(p.category)}</dd>` : ""}
+        ${p.source_vehicle ? `<dt>السيارة المصدر</dt><dd>${esc(p.source_vehicle)}</dd>` : ""}
+      </dl>
+      ${(p.fits||[]).length ? `<div class="muted" style="font-size:.85rem">يركب على:</div><ul class="fits">${p.fits.map(f => `<li>${esc(f.make)} ${esc(f.model)} ${yrs(f)}</li>`).join("")}</ul>` : ""}
+      ${p.description ? `<div class="desc">${esc(p.description)}</div>` : ""}
+      <div class="actions">
+        <button class="btn" data-add="${p.id}" ${p.stock <= 0 ? "disabled" : ""}>${p.stock <= 0 ? "نفدت" : n ? "أضف واحدة أخرى" : "أضف للسلة"}</button>
+        <a class="btn wa" target="_blank" rel="noopener" href="${K.wa(`السلام عليكم، أستفسر عن هذي القطعة:\n${p.name}${p.part_number ? " — " + p.part_number : ""}\n${CONDITIONS[p.condition]} — ${money(p.price)}\n${location.origin}${location.pathname}#part=${p.id}`)}">اسأل واتساب</a>
+      </div>
+      <p class="note" style="margin-top:10px;text-align:right">أرسل رقم الهيكل مع طلبك ونأكد لك التوافق قبل الدفع.</p>
+    </div>
+  </div>`;
+  open("#partModal");
+  if (push) history.replaceState(null, "", "#part=" + p.id);
+}
+
+/* ---------- open/close ---------- */
+function open(sel) { closeAll(false); $(sel).classList.add("on"); $("#ov").classList.add("on"); document.body.style.overflow = "hidden"; }
+function closeAll(clearHash = true) {
+  $$(".modal.on,.drawer.on").forEach(m => m.classList.remove("on"));
+  $("#ov").classList.remove("on"); document.body.style.overflow = "";
+  if (clearHash && location.hash.startsWith("#part=")) history.replaceState(null, "", location.pathname + location.search);
+}
+function openRequest(prefill = "") {
+  const f = $("#reqForm"); if (!f) { resetRequest(); }
+  const form = $("#reqForm");
+  if (prefill) form.part_text.value = prefill;
+  if (state.make) form.vehicle.value = [state.make, state.model, state.year].filter(Boolean).join(" ");
+  open("#reqModal");
+}
+
+/* ---------- actions ---------- */
+function addToCart(id) {
+  const p = PARTS.find(x => x.id === id); if (!p || p.stock <= 0) return;
+  const max = Math.max(1, p.stock);
+  if ((cart[id] || 0) >= max) { K.toast("هذي كل الكمية المتوفرة"); return; }
+  cart[id] = (cart[id] || 0) + 1;
+  renderGrid(); renderCart(); K.toast("أُضيفت للسلة ✓");
+}
+const phoneOk = v => /^[+0-9\s-]{8,20}$/.test(v.trim());
+
+async function submitOrder() {
+  const f = $("#orderForm");
+  const d = Object.fromEntries(new FormData(f).entries());
+  Object.keys(d).forEach(k => d[k] = d[k].trim());
+  if (!d.customer_name || !d.phone || !d.city) { K.toast("عبّ الاسم والجوال والمدينة"); return; }
+  if (!phoneOk(d.phone)) { K.toast("رقم الجوال غير صحيح"); return; }
+  const ids = Object.keys(cart);
+  const items = ids.map(id => { const p = PARTS.find(x => x.id === id); return {id, name: p.name, part_number: p.part_number || "", condition: p.condition, price: p.price, qty: cart[id]}; });
+  const total = items.reduce((s, i) => s + (+i.price || 0) * i.qty, 0);
+  const vehicle = [state.make, state.model, state.year].filter(Boolean).join(" ") || null;
+  const btn = $("#submitOrder"); btn.disabled = true; btn.textContent = "جاري الإرسال…";
+  try {
+    const o = await DB.createOrder({customer_name: d.customer_name, phone: d.phone, city: d.city, vin: d.vin || null, notes: d.notes || null, vehicle, items, total});
+    let msg = `طلب جديد من موقع كاسب\nرقم الطلب: ${o.code}\n\nالاسم: ${d.customer_name}\nالجوال: ${d.phone}\nالمدينة: ${d.city}\n`;
+    if (d.vin) msg += `رقم الهيكل: ${d.vin}\n`;
+    if (vehicle) msg += `السيارة: ${vehicle}\n`;
+    msg += `\nالقطع:\n` + items.map((i, n) => `${n + 1}. ${i.name}${i.part_number ? " — " + i.part_number : ""} (${CONDITIONS[i.condition]}) × ${i.qty} = ${money((+i.price || 0) * i.qty)}`).join("\n");
+    msg += `\n\nالإجمالي التقديري: ${money(total)}`;
+    if (d.notes) msg += `\nملاحظات: ${d.notes}`;
+    cart = {}; saveCart(); renderGrid();
+    $("#cartCount").textContent = 0;
+    $("#lines").innerHTML = ""; $("#totalRow").classList.add("hide"); $("#vatNote").textContent = "";
+    f.classList.add("hide"); $("#cartFoot").classList.add("hide"); f.reset();
+    $("#lines").innerHTML = `<div class="done"><div class="ok">✓</div><h3 style="margin:0">وصلنا طلبك</h3><div class="code ltr">${esc(o.code)}</div><p class="muted" style="margin:0 0 16px">بنتواصل معك على ${esc(d.phone)} لتأكيد الطلب. لتسريع الرد أرسل الطلب لنا على واتساب.</p><a class="btn wa block" target="_blank" rel="noopener" href="${K.wa(msg)}">إرسال الطلب على واتساب</a></div>`;
+  } catch (e) {
+    K.toast("تعذر إرسال الطلب، حاول مرة ثانية أو تواصل واتساب");
+    console.error(e);
+  } finally { btn.disabled = false; btn.textContent = "تأكيد الطلب"; }
+}
+
+function resetRequest() {
+  $("#reqBody").innerHTML = document.getElementById("reqTpl").innerHTML;
+  $("#reqForm").addEventListener("submit", submitRequest);
+}
+async function submitRequest(e) {
+  e.preventDefault();
+  const f = e.target;
+  const d = Object.fromEntries(new FormData(f).entries());
+  Object.keys(d).forEach(k => d[k] = d[k].trim());
+  if (!d.part_text || !d.name || !d.phone) { K.toast("عبّ القطعة والاسم والجوال"); return; }
+  if (!phoneOk(d.phone)) { K.toast("رقم الجوال غير صحيح"); return; }
+  const b = f.querySelector("button[type=submit]"); b.disabled = true; b.textContent = "جاري الإرسال…";
+  try {
+    await DB.createRequest({name: d.name, phone: d.phone, city: d.city || null, vehicle: d.vehicle || null, vin: d.vin || null, part_text: d.part_text});
+    const msg = `طلب قطعة من موقع كاسب\n\nالقطعة: ${d.part_text}\n${d.vehicle ? "السيارة: " + d.vehicle + "\n" : ""}${d.vin ? "رقم الهيكل: " + d.vin + "\n" : ""}الاسم: ${d.name}\nالجوال: ${d.phone}${d.city ? "\nالمدينة: " + d.city : ""}\n\n(أرفقت صورة القطعة)`;
+    $("#reqBody").innerHTML = `<div class="done"><div class="ok">✓</div><h3 style="margin:0 0 6px">وصلنا طلبك</h3><p class="muted" style="margin:0 0 16px">نبحث عن القطعة ونرجع لك بالسعر على ${esc(d.phone)}.<br>عندك صورة للقطعة؟ أرسلها واتساب لنتأكد أسرع.</p><a class="btn wa block" target="_blank" rel="noopener" href="${K.wa(msg)}">إرسال صورة القطعة واتساب</a><button class="btn ghost block" style="margin-top:8px" data-action="new-request">طلب قطعة أخرى</button></div>`;
+  } catch (err) {
+    K.toast("تعذر الإرسال، حاول مرة ثانية أو تواصل واتساب"); console.error(err);
+    b.disabled = false; b.textContent = "إرسال الطلب";
+  }
+}
+
+/* ---------- events ---------- */
+function setCond(v) {
+  state.cond = v; state.cat = ""; state.limit = PAGE;
+  $$("#seg button").forEach(b => b.classList.toggle("on", b.dataset.v === v));
+  renderChips(); renderGrid();
+  document.getElementById("parts").scrollIntoView({behavior: "smooth", block: "start"});
+}
+let qt;
+$("#q").addEventListener("input", e => { clearTimeout(qt); qt = setTimeout(() => { state.q = e.target.value; state.limit = PAGE; renderGrid(); }, 160); });
+$("#q").addEventListener("keydown", e => { if (e.key === "Enter") { e.target.blur(); document.getElementById("parts").scrollIntoView({behavior: "smooth"}); } });
+$("#sort").onchange = e => { state.sort = e.target.value; renderGrid(); };
+$("#seg").onclick = e => { const b = e.target.closest("button"); if (!b) return; state.cond = b.dataset.v; state.cat = ""; state.limit = PAGE; $$("#seg button").forEach(x => x.classList.toggle("on", x === b)); renderChips(); renderGrid(); };
+$("#make").onchange = () => { $("#model").value = ""; $("#year").value = ""; refreshCarSelects(); state.limit = PAGE; renderGrid(); };
+$("#model").onchange = () => { $("#year").value = ""; refreshCarSelects(); state.limit = PAGE; renderGrid(); };
+$("#year").onchange = e => { state.year = e.target.value; renderGrid(); };
+$("#reset").onclick = () => {
+  $("#q").value = ""; Object.assign(state, {q: "", cond: "", cat: "", make: "", model: "", year: "", limit: PAGE});
+  $("#make").value = ""; refreshCarSelects(); $$("#seg button").forEach(b => b.classList.toggle("on", b.dataset.v === "")); renderChips(); renderGrid();
+};
+$("#more").onclick = () => { state.limit += PAGE; renderGrid(); };
+$("#chips").onclick = e => { const b = e.target.closest(".chip"); if (!b) return; state.cat = b.dataset.cat; state.limit = PAGE; renderChips(); renderGrid(); };
+$("#openCart").onclick = () => open("#drawer");
+$("#openRequest").onclick = () => openRequest();
+$("#submitOrder").onclick = submitOrder;
+$("#ov").onclick = () => closeAll();
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeAll(); });
+
+document.addEventListener("click", e => {
+  const t = e.target;
+  if (t.closest("[data-close]")) { closeAll(); return; }
+  const add = t.closest("[data-add]"); if (add) { e.stopPropagation(); addToCart(add.dataset.add); if (add.closest("#partBody")) openPart(add.dataset.add, false); return; }
+  const inc = t.closest("[data-inc]"); if (inc) { const p = PARTS.find(x => x.id === inc.dataset.inc); if (cart[p.id] < Math.max(1, p.stock)) cart[p.id]++; else K.toast("هذي كل الكمية المتوفرة"); renderCart(); renderGrid(); return; }
+  const dec = t.closest("[data-dec]"); if (dec) { const id = dec.dataset.dec; if (--cart[id] <= 0) delete cart[id]; renderCart(); renderGrid(); return; }
+  const g = t.closest("[data-g]"); if (g) { const imgs = $$(".gallery .thumbs img"); imgs.forEach(i => i.classList.remove("on")); g.classList.add("on"); $("#gMain").innerHTML = `<img src="${g.src}" alt="">`; return; }
+  const cond = t.closest("[data-cond]"); if (cond) { e.preventDefault(); setCond(cond.dataset.cond); return; }
+  const act = t.closest("[data-action]");
+  if (act) {
+    e.preventDefault();
+    const a = act.dataset.action;
+    if (a === "request") openRequest();
+    if (a === "request-from-search") openRequest(state.q);
+    if (a === "new-request") { resetRequest(); }
+    return;
+  }
+  const card = t.closest(".card[data-id]"); if (card) openPart(card.dataset.id);
+});
+
+/* ---------- boot ---------- */
+(async function boot() {
+  const tpl = document.createElement("template"); tpl.id = "reqTpl"; tpl.innerHTML = $("#reqBody").innerHTML; document.body.appendChild(tpl);
+  $("#reqForm").addEventListener("submit", submitRequest);
+  const C = K.C, waHello = K.wa("السلام عليكم، أبي أستفسر عن قطعة غيار");
+  $("#fab").href = waHello;
+  $("#waBand").href = K.wa("السلام عليكم، أبحث عن قطعة وأرفقت صورتها:");
+  $("#contact").innerHTML += `<a href="${waHello}" target="_blank" rel="noopener">واتساب</a>` +
+    (C.email ? `<a href="mailto:${esc(C.email)}">${esc(C.email)}</a>` : "") +
+    (C.instagram ? `<a href="https://instagram.com/${esc(C.instagram)}" target="_blank" rel="noopener">انستقرام</a>` : "") +
+    (C.snapchat ? `<a href="https://snapchat.com/add/${esc(C.snapchat)}" target="_blank" rel="noopener">سناب شات</a>` : "") +
+    (C.city ? `<span style="display:block;padding:2px 0">${esc(C.city)}</span>` : "");
+  $("#yr").textContent = new Date().getFullYear();
+  if (!DB.live) $("#demoBar").classList.remove("hide");
+  try {
+    PARTS = await DB.listParts();
+  } catch (e) {
+    console.error(e);
+    $("#grid").innerHTML = `<div class="empty"><h3>تعذر تحميل القطع</h3><p>حدّث الصفحة، أو تواصل معنا مباشرة على واتساب.</p><a class="btn wa" href="${waHello}" target="_blank" rel="noopener">تواصل واتساب</a></div>`;
+    return;
+  }
+  refreshCarSelects(); renderAll();
+  const m = location.hash.match(/^#part=(.+)$/); if (m) openPart(decodeURIComponent(m[1]), false);
+})();
+</script>
+</body>
+</html>
