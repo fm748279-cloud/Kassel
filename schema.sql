@@ -65,18 +65,42 @@ create table if not exists public.part_requests (
   phone text not null check (char_length(phone) between 8 and 20),
   city text check (city is null or char_length(city) <= 60),
   vehicle text check (vehicle is null or char_length(vehicle) <= 120),
+  make text check (make is null or char_length(make) <= 40),
+  model text check (model is null or char_length(model) <= 60),
+  year int check (year is null or year between 1950 and 2100),
   vin text check (vin is null or char_length(vin) <= 17),
   part_text text not null check (char_length(part_text) between 2 and 1000),
   status text not null default 'new' check (status in ('new','quoted','done','cancelled')),
   created_at timestamptz not null default now()
 );
 create index if not exists requests_created_idx on public.part_requests (created_at desc);
+alter table public.part_requests add column if not exists make text;
+alter table public.part_requests add column if not exists model text;
+alter table public.part_requests add column if not exists year int;
+
+-- ---------- توافق القطع مع السيارات ----------
+create table if not exists public.part_fitment (
+  id uuid primary key default gen_random_uuid(),
+  part_key text not null check (char_length(part_key) between 3 and 40),   -- رقم القطعة موحّد: حروف وأرقام فقط
+  part_number text not null check (char_length(part_number) <= 40),
+  catalog_make text check (catalog_make is null or char_length(catalog_make) <= 40),
+  make text not null check (char_length(make) <= 40),
+  model text not null check (char_length(model) <= 60),
+  year_from int not null check (year_from between 1950 and 2100),
+  year_to int not null check (year_to between 1950 and 2100),
+  note text check (note is null or char_length(note) <= 80),               -- اسم القطعة بالعربي
+  created_at timestamptz not null default now(),
+  unique (part_key, make, model, year_from, year_to)
+);
+create index if not exists fitment_car_idx on public.part_fitment (make, model);
+create index if not exists fitment_part_idx on public.part_fitment (part_key);
 
 -- ---------- الصلاحيات (Row Level Security) ----------
 alter table public.admins        enable row level security;
 alter table public.parts         enable row level security;
 alter table public.orders        enable row level security;
 alter table public.part_requests enable row level security;
+alter table public.part_fitment  enable row level security;
 
 -- المشرف يرى نفسه فقط
 drop policy if exists admins_self on public.admins;
@@ -98,6 +122,12 @@ drop policy if exists requests_public_insert on public.part_requests;
 create policy requests_public_insert on public.part_requests for insert with check (status = 'new');
 drop policy if exists requests_admin on public.part_requests;
 create policy requests_admin on public.part_requests for all using (public.is_admin()) with check (public.is_admin());
+
+-- التوافق: الجميع يقرأ، والمشرف يدير
+drop policy if exists fitment_public_read on public.part_fitment;
+create policy fitment_public_read on public.part_fitment for select using (true);
+drop policy if exists fitment_admin_write on public.part_fitment;
+create policy fitment_admin_write on public.part_fitment for all using (public.is_admin()) with check (public.is_admin());
 
 -- ---------- تخزين صور القطع ----------
 insert into storage.buckets (id, name, public)

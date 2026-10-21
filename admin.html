@@ -81,6 +81,11 @@ body{padding-bottom:80px}
 .form-foot .btn:first-child{flex:1}
 .fab{position:fixed;bottom:18px;left:18px;z-index:40;border-radius:16px;padding:14px 20px;box-shadow:0 10px 26px rgba(232,89,12,.35);font-size:1rem}
 
+/* fitment */
+.fitpart{font-size:.85rem;margin:-4px 0 12px;min-height:1.2em;line-height:1.7}
+.fitpart b{color:var(--text)}
+.fitpart.bad{color:var(--danger)}
+
 /* login */
 .login{min-height:100vh;display:grid;place-items:center;padding:20px;background:var(--ink)}
 .login .box{background:var(--card);border-radius:20px;padding:26px;width:min(380px,100%)}
@@ -133,6 +138,7 @@ body{padding-bottom:80px}
       <button data-tab="parts">القطع</button>
       <button data-tab="orders">الطلبات <span class="n hide" id="nOrders"></span></button>
       <button data-tab="requests">طلبات القطع <span class="n hide" id="nReqs"></span></button>
+      <button data-tab="fitment">توافق القطع</button>
     </nav>
 
     <!-- home -->
@@ -180,6 +186,42 @@ body{padding-bottom:80px}
           <select class="input" id="rstatus" style="width:auto"><option value="">كل الحالات</option><option value="new">جديد</option><option value="quoted">تم التسعير</option><option value="done">مكتمل</option><option value="cancelled">ملغي</option></select>
         </div>
         <div class="rows" id="reqsList"></div>
+      </div>
+    </section>
+
+    <!-- fitment -->
+    <section data-view="fitment" class="hide">
+      <div class="panel">
+        <div class="panel-h"><h2>ربط قطعة بسيارة</h2></div>
+        <p class="muted" style="margin:-4px 0 12px;font-size:.88rem">كل قطعة تربطها تطلع للعميل لما يختار سيارته، ويظهر جنبها "يركب على سيارتك".</p>
+        <form id="fitForm" novalidate>
+          <div class="grid2">
+            <div class="field"><label for="fitPn">رقم القطعة *</label><input class="input ltr" id="fitPn" maxlength="40" autocomplete="off" style="text-align:right" placeholder="04152-YZZA6"></div>
+            <div class="field"><label for="fitName">اسم القطعة بالعربي</label><input class="input" id="fitName" maxlength="80" placeholder="مثال: فلتر زيت"></div>
+          </div>
+          <div class="fitpart muted" id="fitPart"></div>
+          <div class="grid2">
+            <div class="field"><label for="fitMake">الماركة *</label><input class="input" id="fitMake" list="makesList" maxlength="40" autocomplete="off"></div>
+            <div class="field"><label for="fitModel">الموديل *</label><input class="input" id="fitModel" list="fitModels" maxlength="60" autocomplete="off"></div>
+          </div>
+          <div class="grid2">
+            <div class="field"><label for="fitFrom">من سنة *</label><input class="input" id="fitFrom" type="number" inputmode="numeric" min="1950" max="2100"></div>
+            <div class="field"><label for="fitTo">إلى سنة</label><input class="input" id="fitTo" type="number" inputmode="numeric" min="1950" max="2100" placeholder="نفس السنة"></div>
+          </div>
+          <button class="btn block" type="submit" id="fitSave">حفظ الربط</button>
+        </form>
+        <datalist id="fitModels"></datalist>
+      </div>
+      <div class="panel">
+        <div class="panel-h"><h2>استيراد من ملف Excel</h2></div>
+        <p class="muted" style="margin:-4px 0 10px;font-size:.88rem">انسخ الأعمدة من Excel بهذا الترتيب والصقها هنا: رقم القطعة، الماركة، الموديل، من سنة، إلى سنة، اسم القطعة (اختياري). اكتب رقم القطعة الأصلي بدون بادئة المورد.</p>
+        <textarea class="input ltr" id="fitPaste" rows="5" style="text-align:right" placeholder="04152-YZZA6	تويوتا	كامري	2018	2022	فلتر زيت"></textarea>
+        <div style="display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap"><button class="btn ghost" id="fitImport" type="button">استيراد</button><span class="muted" id="fitImportMsg" style="font-size:.88rem"></span></div>
+      </div>
+      <div class="panel">
+        <div class="panel-h"><h2>القطع المربوطة <span class="muted" id="fitCount" style="font-size:.9rem;font-weight:500"></span></h2></div>
+        <div class="toolbar"><input class="input" id="fitQ" type="search" placeholder="بحث برقم القطعة أو السيارة"></div>
+        <div class="rows" id="fitList"></div>
       </div>
     </section>
   </main>
@@ -301,14 +343,14 @@ async function start() {
 }
 async function loadAll() {
   try {
-    [PARTS, ORDERS, REQS] = await Promise.all([DB.listAllParts(), DB.listOrders(), DB.listRequests()]);
+    [PARTS, ORDERS, REQS, FIT] = await Promise.all([DB.listAllParts(), DB.listOrders(), DB.listRequests(), DB.listFitment()]);
   } catch (e) { K.toast("تعذر تحميل البيانات: " + e.message); console.error(e); }
   const cats = [...new Set([...K.CATEGORIES, ...PARTS.map(p => p.category).filter(Boolean)])];
   $("#catsList").innerHTML = cats.map(c => `<option value="${esc(c)}">`).join("");
   $("#brandsList").innerHTML = [...new Set(PARTS.map(p => p.brand).filter(Boolean))].map(c => `<option value="${esc(c)}">`).join("");
   renderAll();
 }
-function renderAll() { renderStats(); renderParts(); renderOrders(); renderReqs(); renderHome(); }
+function renderAll() { renderStats(); renderParts(); renderOrders(); renderReqs(); renderHome(); renderFit(); }
 
 /* ---------- tabs ---------- */
 function go(tab) {
@@ -398,6 +440,7 @@ function reqCard(r) {
     <div class="acts">
       <select class="input" data-rstatus="${r.id}">${Object.entries(REQ_ST).map(([k, v]) => `<option value="${k}" ${r.status === k ? "selected" : ""}>${v}</option>`).join("")}</select>
       <a class="btn wa sm" target="_blank" rel="noopener" href="${waCustomer(r.phone, `السلام عليكم ${r.name}، معك كاسب لقطع الغيار بخصوص طلبك: ${r.part_text}`)}">رد واتساب</a>
+      <button class="btn ghost sm" type="button" data-linkreq="${r.id}">ربط قطعة بالسيارة</button>
       <a class="btn ghost sm" href="tel:${esc(r.phone)}">اتصال</a>
     </div></div>`;
 }
@@ -506,6 +549,97 @@ $("#exportCsv").onclick = () => {
   const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], {type: "text/csv"})); a.download = `kassep-parts-${new Date().toISOString().slice(0, 10)}.csv`; a.click();
 };
 
+/* ---------- fitment: ربط القطع بالسيارات ---------- */
+let FIT = [];
+const pnKey = s => String(s ?? "").toUpperCase().replace(/[^0-9A-Z]/g, "");
+const fitYears = f => `⁦${f.year_from}${f.year_to != f.year_from ? "–" + f.year_to : ""}⁩`;
+let catM = null;
+async function catLookup(raw) {
+  if (catM === null) catM = await fetch("catalog/manifest.json").then(r => r.ok ? r.json() : false).catch(() => false);
+  if (!catM) return [];
+  const set = new Set(catM.shards);
+  const tryKey = async k => {
+    if (k.length < 3) return [];
+    const sh = set.has(k.slice(0, 3)) ? k.slice(0, 3) : k.slice(0, 2);
+    if (!set.has(sh)) return [];
+    const rows = await fetch(`catalog/s/${(catM.map && catM.map[sh]) || sh}.json`).then(r => r.ok ? r.json() : []).catch(() => []);
+    return rows.filter(r => pnKey(r[0]) === k);
+  };
+  const k = pnKey(raw);
+  let res = await tryKey(k);
+  for (const p of ["KM", "HY", "MI", "K", "N", "W"]) { if (res.length) break; if (k.startsWith(p)) res = await tryKey(k.slice(p.length)); }
+  return res;
+}
+let lookSeq = 0, lookRes = [], lookFor = "";
+async function lookupPart() {
+  const v = $("#fitPn").value.trim(), box = $("#fitPart"), seq = ++lookSeq;
+  if (pnKey(v).length < 4) { box.textContent = ""; box.classList.remove("bad"); lookRes = []; lookFor = v; return; }
+  box.classList.remove("bad"); box.textContent = "جاري البحث في قائمة الأسعار…";
+  const res = await catLookup(v);
+  if (seq !== lookSeq) return;
+  lookRes = res; lookFor = v;
+  if (!res.length) { box.classList.add("bad"); box.textContent = "الرقم مو موجود في قائمة الأسعار. تقدر تحفظ الربط، بس ما يطلع للعميل في البحث بالسيارة إلا لو كان الرقم في القائمة."; return; }
+  box.innerHTML = res.map(r => `<b class="ltr">${esc(r[0])}</b>، ${esc(catM.makes[r[1]])}، ${esc(r[2] || "قطعة أصلية")}، أقل سعر ${money(r[3][0][1])}`).join("<br>");
+  const ar = res.map(r => r[2] || "").find(d => /[؀-ۿ]/.test(d));
+  if (!$("#fitName").value && ar) $("#fitName").value = ar.split(" - ").pop();
+  const cmk = catM.makes[res[0][1]];
+  if (!$("#fitMake").value && K.VEHICLES[cmk]) { $("#fitMake").value = cmk; fillFitModels(); }
+}
+function fillFitModels() { $("#fitModels").innerHTML = (K.VEHICLES[$("#fitMake").value.trim()] || []).map(x => `<option value="${esc(x)}">`).join(""); }
+function renderFit() {
+  const q = norm($("#fitQ").value);
+  const list = FIT.filter(f => !q || norm([f.part_number, f.make, f.model, f.note, f.year_from, f.year_to].join(" ")).includes(q));
+  $("#fitCount").textContent = `(${list.length.toLocaleString("ar-SA")})`;
+  $("#fitList").innerHTML = list.length ? list.slice(0, 300).map(f => `
+    <div class="row"><div class="info"><b class="ltr" style="text-align:right">${esc(f.part_number)}</b>
+      <div class="meta"><span class="badge new">${esc(f.make)} ${esc(f.model)} ${fitYears(f)}</span>${f.note ? `<span>${esc(f.note)}</span>` : ""}</div></div>
+      <div class="side"><button class="btn danger sm" type="button" data-delfit="${f.id}">حذف</button></div></div>`).join("")
+    : `<div class="empty">${FIT.length ? "ما فيه نتائج مطابقة" : "ما فيه قطع مربوطة بعد. اربط أول قطعة من الأعلى، أو استورد من ملف."}</div>`;
+}
+let fitT;
+$("#fitPn").addEventListener("input", () => { clearTimeout(fitT); fitT = setTimeout(lookupPart, 350); });
+$("#fitMake").addEventListener("input", fillFitModels);
+$("#fitQ").addEventListener("input", renderFit);
+$("#fitForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const pn = $("#fitPn").value.trim(), make = $("#fitMake").value.trim(), model = $("#fitModel").value.trim();
+  const from = parseInt($("#fitFrom").value, 10), to = parseInt($("#fitTo").value, 10) || from;
+  if (pnKey(pn).length < 3 || !make || !model || !from) { K.toast("عبّ رقم القطعة والماركة والموديل وسنة البداية"); return; }
+  if (from < 1950 || to > 2100 || to < from) { K.toast("تأكد من السنوات: إلى سنة لازم تكون بعد من سنة"); return; }
+  if (lookFor !== pn) { clearTimeout(fitT); await lookupPart(); }
+  const r0 = lookRes[0];
+  const row = {part_key: r0 ? pnKey(r0[0]) : pnKey(pn), part_number: r0 ? r0[0] : pn, catalog_make: lookRes.length === 1 ? catM.makes[r0[1]] : null,
+    make, model, year_from: from, year_to: to, note: $("#fitName").value.trim() || null};
+  const b = $("#fitSave"); b.disabled = true; b.textContent = "جاري الحفظ…";
+  try {
+    const added = await DB.addFitment([row]);
+    FIT = await DB.listFitment(); renderFit();
+    K.toast(added && added.length === 0 ? "هذا الربط موجود من قبل" : "تم الربط ✓");
+    $("#fitPn").value = ""; $("#fitName").value = ""; $("#fitPart").textContent = ""; lookRes = []; lookFor = ""; $("#fitPn").focus();
+  } catch (err) { K.toast("تعذر الحفظ: " + err.message); }
+  finally { b.disabled = false; b.textContent = "حفظ الربط"; }
+});
+$("#fitImport").onclick = async () => {
+  const lines = $("#fitPaste").value.split(/\r?\n/).map(l => l.trim()).filter(Boolean), rows = [], bad = [];
+  lines.forEach((l, i) => {
+    const c = (l.includes("\t") ? l.split("\t") : l.split(/[,،;]/)).map(x => x.trim());
+    const from = parseInt(c[3], 10), to = parseInt(c[4], 10) || from;
+    if (pnKey(c[0]).length < 3 || !c[1] || !c[2] || !(from >= 1950 && from <= 2100) || to < from || to > 2100) { if (i > 0 || /\d{4}/.test(l)) bad.push(i + 1); return; }
+    rows.push({part_key: pnKey(c[0]), part_number: c[0], catalog_make: null, make: c[1], model: c[2], year_from: from, year_to: to, note: (c[5] || "").slice(0, 80) || null});
+  });
+  const msg = $("#fitImportMsg"), ar = n => n.toLocaleString("ar-SA");
+  if (!rows.length) { msg.textContent = "ما لقيت صفوف صحيحة. تأكد من ترتيب الأعمدة."; return; }
+  const b = $("#fitImport"); b.disabled = true; msg.textContent = "جاري الاستيراد…";
+  try {
+    let added = 0;
+    for (let i = 0; i < rows.length; i += 500) { const r = await DB.addFitment(rows.slice(i, i + 500)); added += r ? r.length : 0; }
+    FIT = await DB.listFitment(); renderFit();
+    msg.textContent = `تم الاستيراد: ${ar(added)} جديد` + (rows.length - added ? `، و${ar(rows.length - added)} موجود من قبل` : "") + (bad.length ? `، وتجاهلت ${ar(bad.length)} سطر ناقص (${bad.slice(0, 5).map(ar).join("، ")})` : "");
+    $("#fitPaste").value = "";
+  } catch (err) { msg.textContent = "تعذر الاستيراد: " + err.message; }
+  finally { b.disabled = false; }
+};
+
 /* ---------- global clicks ---------- */
 document.addEventListener("click", async e => {
   const t = e.target;
@@ -516,6 +650,19 @@ document.addEventListener("click", async e => {
   const rm = t.closest("[data-rmfit]"); if (rm) { rm.parentElement.remove(); if (!$$("#fits .fitrow").length) $("#addFit").click(); return; }
   const ri = t.closest("[data-rmimg]"); if (ri) { editImages.splice(+ri.dataset.rmimg, 1); return renderImgs(); }
   const fi = t.closest("[data-first]"); if (fi) { const [x] = editImages.splice(+fi.dataset.first, 1); editImages.unshift(x); return renderImgs(); }
+  const df = t.closest("[data-delfit]");
+  if (df) {
+    if (!(await ask("حذف هذا الربط؟", "حذف"))) return;
+    try { await DB.deleteFitment(df.dataset.delfit); FIT = FIT.filter(f => f.id !== df.dataset.delfit); renderFit(); K.toast("تم الحذف"); }
+    catch (err) { K.toast("تعذر الحذف: " + err.message); }
+    return;
+  }
+  const lr = t.closest("[data-linkreq]");
+  if (lr) {
+    const r = REQS.find(x => x.id === lr.dataset.linkreq); go("fitment");
+    if (r) { $("#fitMake").value = r.make || ""; fillFitModels(); $("#fitModel").value = r.model || ""; $("#fitFrom").value = r.year || ""; $("#fitTo").value = r.year || ""; $("#fitName").value = (r.part_text || "").slice(0, 80); }
+    $("#fitPn").focus(); return;
+  }
   const tg = t.closest("[data-toggle]");
   if (tg) {
     const p = PARTS.find(x => x.id === tg.dataset.toggle);

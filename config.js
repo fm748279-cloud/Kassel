@@ -8,6 +8,9 @@ window.KASSEP_CONFIG = {
   // رقم واتساب كاسب بالصيغة الدولية بدون + (مثال: 966501234567)
   whatsapp: "9665XXXXXXXX",
 
+  // رابط كتالوج الوكالة (مثل carscats) — إذا عبّيته يطلع زر في الموقع يفتحه
+  oemCatalogUrl: "",
+
   currency: "ر.س",
   vatIncluded: true,
   city: "الرياض",

@@ -154,6 +154,15 @@ footer a:hover{color:#fff}
 .badge.sup{background:var(--used-soft);color:var(--used)}
 .cnote{font-size:.8rem;color:var(--muted);margin:10px 0 0}
 .cload{color:var(--muted);font-size:.9rem;padding:8px 2px}
+.cgroup-h .d b{color:var(--text);font-weight:600}
+.cgroup-h .fitl{font-size:.8rem;color:var(--muted);margin-top:4px}
+.cempty{text-align:center;padding:12px 6px}
+.cempty p{margin:0 0 12px;color:var(--muted)}
+.finder-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.finder-actions .btn{flex:1 1 220px}
+.vin-hint{font-size:.8rem;margin-top:4px;color:var(--muted)}
+.vin-hint.ok{color:var(--new)}
+.vin-hint.bad{color:var(--danger)}
 @media (max-width:520px){.offer{gap:8px;padding:9px 10px}.offer .add{width:auto;padding:7px 12px}.offer .price{font-size:.95rem}}
 .demo{background:var(--scrap-soft);color:var(--scrap);text-align:center;font-size:.82rem;padding:6px 16px}
 
@@ -227,13 +236,17 @@ footer a:hover{color:#fff}
       <select class="input" id="year" aria-label="السنة"><option value="">السنة</option></select>
       <button class="btn ghost" id="reset" type="button">مسح البحث</button>
     </div>
+    <div class="finder-actions">
+      <button class="btn ghost" type="button" data-action="request">ما تعرف رقم القطعة؟ اطلب برقم الهيكل</button>
+      <a class="btn ghost hide" id="oemLink" target="_blank" rel="noopener">ابحث بالرسم في كتالوج الوكالة ↗</a>
+    </div>
   </div>
 </div>
 
 <main class="wrap">
   <section class="section" id="parts">
     <div class="catalog hide" id="catalog">
-      <div class="section-h"><h2>نتائج رقم القطعة</h2><span class="muted" id="catCount"></span></div>
+      <div class="section-h"><h2 id="catTitle">نتائج رقم القطعة</h2><span class="muted" id="catCount"></span></div>
       <div class="clist" id="clist"></div>
       <p class="cnote">قطع أصلية جديدة. الأسعار من موردين مختلفين ومرتبة من الأقل، والتوفر يتأكد معك بعد الطلب.</p>
     </div>
@@ -300,8 +313,15 @@ footer a:hover{color:#fff}
   <div class="modal-b" id="reqBody">
     <form id="reqForm" novalidate>
       <div class="field"><label>القطعة المطلوبة *</label><textarea class="input" name="part_text" required maxlength="1000" placeholder="مثال: شمعة أمامية يمين LED"></textarea></div>
-      <div class="field"><label>السيارة (الماركة والموديل والسنة)</label><input class="input" name="vehicle" maxlength="120" placeholder="مثال: كامري 2019"></div>
-      <div class="field"><label>رقم الهيكل VIN (يسرّع الرد)</label><input class="input ltr" name="vin" maxlength="17" style="text-align:right"></div>
+      <div class="field"><label>السيارة</label>
+        <div class="grid3">
+          <select class="input" name="make" aria-label="الماركة"><option value="">الماركة</option></select>
+          <input class="input" name="model" list="reqModels" maxlength="60" placeholder="الموديل" aria-label="الموديل">
+          <select class="input" name="year" aria-label="السنة"><option value="">السنة</option></select>
+        </div>
+        <datalist id="reqModels"></datalist>
+      </div>
+      <div class="field"><label>رقم الهيكل VIN (يسرّع الرد ويضمن التوافق)</label><input class="input ltr" name="vin" maxlength="17" autocapitalize="characters" style="text-align:right"><div class="vin-hint" data-vinhint>موجود في الاستمارة وأسفل الزجاج الأمامي، ١٧ خانة</div></div>
       <div class="grid2">
         <div class="field"><label>الاسم *</label><input class="input" name="name" required maxlength="80" autocomplete="name"></div>
         <div class="field"><label>الجوال *</label><input class="input" name="phone" type="tel" inputmode="tel" required maxlength="20" placeholder="05xxxxxxxx" autocomplete="tel"></div>
@@ -327,7 +347,7 @@ footer a:hover{color:#fff}
         <div class="field"><label>الجوال *</label><input class="input" name="phone" type="tel" inputmode="tel" required maxlength="20" placeholder="05xxxxxxxx" autocomplete="tel"></div>
         <div class="field"><label>المدينة *</label><input class="input" name="city" required maxlength="60"></div>
       </div>
-      <div class="field"><label>رقم الهيكل VIN (اختياري — يضمن التوافق)</label><input class="input ltr" name="vin" maxlength="17" style="text-align:right"></div>
+      <div class="field"><label>رقم الهيكل VIN (اختياري — يضمن التوافق)</label><input class="input ltr" name="vin" maxlength="17" autocapitalize="characters" style="text-align:right"><div class="vin-hint" data-vinhint>موجود في الاستمارة وأسفل الزجاج الأمامي، ١٧ خانة</div></div>
       <div class="field"><label>ملاحظات</label><textarea class="input" name="notes" maxlength="1000"></textarea></div>
     </form>
   </div>
@@ -352,51 +372,90 @@ let cartMeta = (() => { try { return JSON.parse(localStorage.getItem("kassep_car
 const saveCart = () => { try { localStorage.setItem("kassep_cart", JSON.stringify(cart)); localStorage.setItem("kassep_cart_meta", JSON.stringify(cartMeta)); } catch (e) {} };
 const item = id => PARTS.find(p => p.id === id) || cartMeta[id];
 
-/* ---------- catalog (price list search by part number) ---------- */
+/* ---------- catalog: search the price list by part number, or by car ---------- */
 // كل قطعة: [الرقم، الماركة، الوصف، العروض، رقم بديل؟] — العرض: [المورد، السعر، كود المورد؟]
-const CAT = {manifest: null, shards: {}, results: []};
+const CAT = {manifest: null, shards: {}, results: [], fit: {}, mode: ""};
 const pnKey = s => String(s ?? "").toUpperCase().replace(/[^0-9A-Z]/g, "");
 const arNum = n => Number(n).toLocaleString("ar-SA");
 const plural = (n, one, two, few, many) => n === 1 ? one : n === 2 ? two : `${arNum(n)} ${n % 100 >= 3 && n % 100 <= 10 ? few : many}`;
+const fitYears = f => `⁦${f.year_from}${f.year_to != f.year_from ? "–" + f.year_to : ""}⁩`;
+const carLabel = () => [state.make, state.model, state.year].filter(Boolean).join(" ");
+const fitsMyCar = f => f.make === state.make && (!state.model || f.model === state.model) && (!state.year || (+state.year >= f.year_from && +state.year <= f.year_to));
+const groupFit = rows => rows.reduce((o, f) => ((o[f.part_key] = o[f.part_key] || []).push(f), o), {});
 function catManifest() {
   if (!CAT.mp) CAT.mp = fetch("catalog/manifest.json").then(r => r.ok ? r.json() : false).catch(() => false)
     .then(m => { CAT.manifest = m; if (m) CAT.set = new Set(m.shards); return m; });
   return CAT.mp;
 }
-function catShard(key) {
-  if (!CAT.shards[key]) CAT.shards[key] = fetch(`catalog/s/${key}.json`).then(r => r.ok ? r.json() : []).catch(() => { delete CAT.shards[key]; return []; });
-  return CAT.shards[key];
+function catShard(file) {
+  if (!CAT.shards[file]) CAT.shards[file] = fetch(`catalog/s/${file}.json`).then(r => r.ok ? r.json() : []).catch(() => { delete CAT.shards[file]; return []; });
+  return CAT.shards[file];
+}
+const shardFile = (m, k) => { const sh = CAT.set.has(k.slice(0, 3)) ? k.slice(0, 3) : k.slice(0, 2); return CAT.set.has(sh) ? ((m.map && m.map[sh]) || sh) : null; };
+async function catRecords(m, keys) {
+  const files = {}, out = [];
+  keys.forEach(k => { const f = shardFile(m, k); if (f) (files[f] = files[f] || []).push(k); });
+  await Promise.all(Object.entries(files).map(async ([f, ks]) => { const want = new Set(ks); (await catShard(f)).forEach(r => { if (want.has(pnKey(r[0]))) out.push(r); }); }));
+  return out;
 }
 let catSeq = 0;
 async function searchCatalog() {
   const k = pnKey(state.q), box = $("#catalog");
-  if (k.length < 4 || !/\d/.test(k)) { box.classList.add("hide"); if (CAT.results.length) { CAT.results = []; renderGrid(); } return; }
+  const pnMode = k.length >= 4 && /\d/.test(k), carMode = !pnMode && !!(state.make && state.model);
+  if (!pnMode && !carMode) { catSeq++; box.classList.add("hide"); const had = CAT.results.length || CAT.mode; CAT.results = []; CAT.mode = ""; if (had) renderGrid(); return; }
   const seq = ++catSeq;
   const m = await catManifest();
-  if (!m || seq !== catSeq) { if (!m) box.classList.add("hide"); return; }
-  const shard = CAT.set.has(k.slice(0, 3)) ? k.slice(0, 3) : k.slice(0, 2);
-  if (!CAT.set.has(shard)) { CAT.results = []; renderCatalog(); return renderGrid(); }
-  if (!CAT.results.length) { box.classList.remove("hide"); $("#clist").innerHTML = `<div class="cload">جاري البحث في ${arNum(m.count)} رقم قطعة…</div>`; $("#catCount").textContent = ""; }
-  const rows = await catShard((m.map && m.map[shard]) || shard);   // map: optional bundling of shards into fewer files
   if (seq !== catSeq) return;
-  let res = rows.filter(r => pnKey(r[0]).startsWith(k) || (r[4] && pnKey(r[4]) === k));
-  if (state.make) { const mk = m.makes.findIndex(x => x === state.make || x.includes(state.make)); if (mk >= 0) res = res.filter(r => r[1] === mk); }
-  res.sort((a, b) => (pnKey(b[0]) === k) - (pnKey(a[0]) === k) || pnKey(a[0]).length - pnKey(b[0]).length);
-  CAT.results = res;
+  if (!m) { box.classList.add("hide"); return; }
+  if (!CAT.results.length) { box.classList.remove("hide"); $("#catTitle").textContent = pnMode ? "نتائج رقم القطعة" : `قطع ${carLabel()}`; $("#clist").innerHTML = `<div class="cload">جاري البحث…</div>`; $("#catCount").textContent = ""; }
+  let res = [], fit = {};
+  if (pnMode) {
+    const f = shardFile(m, k);
+    if (f) {
+      res = (await catShard(f)).filter(r => pnKey(r[0]).startsWith(k) || (r[4] && pnKey(r[4]) === k));
+      if (state.make) { const mk = m.makes.findIndex(x => x === state.make || x.includes(state.make)); if (mk >= 0) res = res.filter(r => r[1] === mk); }
+      res.sort((a, b) => (pnKey(b[0]) === k) - (pnKey(a[0]) === k) || pnKey(a[0]).length - pnKey(b[0]).length);
+      fit = groupFit(await DB.fitmentForParts([...new Set(res.slice(0, 30).map(r => pnKey(r[0])))]).catch(() => []));
+      if (state.make) { const mine = r => (fit[pnKey(r[0])] || []).some(fitsMyCar); res.sort((a, b) => mine(b) - mine(a)); }
+    }
+  } else {
+    const rows = (await DB.fitmentForCar(state.make, state.model).catch(() => [])).filter(f => !state.year || (+state.year >= f.year_from && +state.year <= f.year_to));
+    fit = groupFit(rows);
+    const allowed = {};   // رقم القطعة ← ماركات الكتالوج المسموحة (* = أي ماركة)
+    rows.forEach(f => (allowed[f.part_key] = allowed[f.part_key] || new Set()).add(f.catalog_make || "*"));
+    res = (await catRecords(m, Object.keys(allowed).slice(0, 300))).filter(r => { const s = allowed[pnKey(r[0])]; return s.has("*") || s.has(m.makes[r[1]]); });
+    const words = state.q.trim().split(/\s+/).map(norm).filter(Boolean);
+    if (words.length) res = res.filter(r => { const hay = norm([r[0], r[2], ...(fit[pnKey(r[0])] || []).map(f => f.note)].join(" ")); return words.every(w => hay.includes(w)); });
+    const name = r => ((fit[pnKey(r[0])] || []).find(f => f.note) || {}).note || r[2] || "";
+    res.sort((a, b) => name(a).localeCompare(name(b), "ar"));
+  }
+  if (seq !== catSeq) return;
+  CAT.results = res; CAT.fit = fit; CAT.mode = pnMode ? "pn" : "car";
   renderCatalog(); renderGrid();
 }
 const catId = (r, o) => `c:${r[1]}:${pnKey(r[0])}:${o[0]}`;
 const supLabel = s => `مورد ${arNum(s[1])}`;
+const fitNote = r => ((CAT.fit[pnKey(r[0])] || []).find(f => f.note) || {}).note;
 function renderCatalog() {
   const box = $("#catalog"), m = CAT.manifest, res = CAT.results;
-  if (!res.length) { box.classList.add("hide"); return; }
+  $("#catTitle").textContent = CAT.mode === "car" ? `قطع ${carLabel()}` : "نتائج رقم القطعة";
+  if (!res.length) {
+    if (CAT.mode !== "car") { box.classList.add("hide"); return; }
+    box.classList.remove("hide"); $("#catCount").textContent = "";
+    const q = state.q.trim();
+    $("#clist").innerHTML = `<div class="cempty"><p>${q ? `ما لقينا "${esc(q)}" في القطع المربوطة بـ ${esc(carLabel())}.` : `ما ربطنا قطع بـ ${esc(carLabel())} في الموقع بعد.`} اكتب القطعة ورقم الهيكل ونرد عليك برقمها وسعرها.</p><button class="btn" type="button" data-action="request-from-search">اطلب برقم الهيكل</button></div>`;
+    return;
+  }
   box.classList.remove("hide");
   const shown = res.slice(0, 30), prices = shown.reduce((n, r) => n + r[3].length, 0);
   $("#catCount").textContent = res.length > 30 ? `أول ${arNum(30)} من ${arNum(res.length)} قطعة` : `${plural(res.length, "قطعة واحدة", "قطعتين", "قطع", "قطعة")}، ${plural(prices, "سعر واحد", "سعرين", "أسعار", "سعر")}`;
-  $("#clist").innerHTML = shown.map((r, gi) => `<div class="cgroup">
+  $("#clist").innerHTML = shown.map((r, gi) => {
+    const fits = CAT.fit[pnKey(r[0])] || [], mine = state.make && fits.some(fitsMyCar), note = fitNote(r);
+    return `<div class="cgroup">
       <div class="cgroup-h">
-        <div class="ctop"><span class="pn ltr">${esc(r[0])}</span><span class="badge">${esc(m.makes[r[1]])}</span>${r[3].length > 1 ? `<span class="badge">${plural(r[3].length, "", "سعرين", "أسعار", "سعر")}</span>` : ""}${r[4] ? `<span class="badge">بديل: <bdi>${esc(r[4])}</bdi></span>` : ""}</div>
-        <div class="d">${esc(r[2] || "قطعة أصلية")}</div>
+        <div class="ctop"><span class="pn ltr">${esc(r[0])}</span><span class="badge">${esc(m.makes[r[1]])}</span>${mine ? `<span class="badge best">يركب على سيارتك ✓</span>` : ""}${r[3].length > 1 ? `<span class="badge">${plural(r[3].length, "", "سعرين", "أسعار", "سعر")}</span>` : ""}${r[4] ? `<span class="badge">بديل: <bdi>${esc(r[4])}</bdi></span>` : ""}</div>
+        <div class="d">${note ? `<b>${esc(note)}</b> — ` : ""}${esc(r[2] || "قطعة أصلية")}</div>
+        ${fits.length ? `<div class="fitl">يركب على: ${fits.slice(0, 4).map(f => `${esc(f.make)} ${esc(f.model)} ${fitYears(f)}`).join("، ")}${fits.length > 4 ? ` و${arNum(fits.length - 4)} غيرها` : ""}</div>` : ""}
       </div>
       ${r[3].map((o, oi) => {
         const s = m.sources[o[0]], id = catId(r, o), n = cart[id] || 0, code = o[2] || r[0];
@@ -406,13 +465,14 @@ function renderCatalog() {
           <button class="add ${n ? "in" : ""}" data-cadd="${gi}:${oi}" aria-label="أضف ${supLabel(s)} للسلة">${n ? `✓ ${arNum(n)}` : "أضف"}</button>
         </div>`;
       }).join("")}
-    </div>`).join("");
+    </div>`;
+  }).join("") + (CAT.mode === "car" ? `<div class="cload">ما لقيت قطعتك؟ <a href="#" data-action="request-from-search">اطلب برقم الهيكل</a></div>` : "");
 }
 function addCatalog(ref) {
   const [gi, oi] = String(ref).split(":").map(Number);
   const r = CAT.results[gi], o = r && r[3][oi]; if (!o) return;
   const s = CAT.manifest.sources[o[0]], id = catId(r, o);
-  cartMeta[id] = {id, name: r[2] ? r[2].split(" - ").pop() : "قطعة أصلية", part_number: r[0], code: o[2] || r[0], price: o[1], condition: "new",
+  cartMeta[id] = {id, name: fitNote(r) || (r[2] ? r[2].split(" - ").pop() : "قطعة أصلية"), part_number: r[0], code: o[2] || r[0], price: o[1], condition: "new",
     make: CAT.manifest.makes[r[1]], supplier: supLabel(s), sheet: s[2], catalog: true, stock: 99};
   cart[id] = (cart[id] || 0) + 1;
   renderCatalog(); renderCart(); K.toast("أُضيفت للسلة ✓");
@@ -425,16 +485,14 @@ function fill(el, items, label) {
   el.innerHTML = `<option value="">${label}</option>` + items.map(i => `<option>${esc(i)}</option>`).join("");
   el.value = items.map(String).includes(cur) ? cur : "";
 }
+const carMakes = () => uniq([...Object.keys(K.VEHICLES), ...PARTS.flatMap(p => (p.fits || []).map(f => f.make))]);
+const carModels = make => make ? uniq([...(K.VEHICLES[make] || []), ...PARTS.flatMap(p => (p.fits || []).filter(f => f.make === make).map(f => f.model))]) : [];
 function refreshCarSelects() {
-  const all = PARTS.flatMap(p => p.fits || []);
-  fill($("#make"), uniq(all.map(f => f.make)).sort((a,b)=>a.localeCompare(b,"ar")), "الماركة");
+  fill($("#make"), carMakes(), "الماركة");
   state.make = $("#make").value;
-  const m = all.filter(f => !state.make || f.make === state.make);
-  fill($("#model"), uniq(m.map(f => f.model)).sort((a,b)=>a.localeCompare(b,"ar")), "الموديل");
+  fill($("#model"), carModels(state.make), "الموديل");
   state.model = $("#model").value;
-  const y = m.filter(f => !state.model || f.model === state.model);
-  const years = uniq(y.flatMap(f => { const r = []; for (let i = +f.from; i <= +f.to && r.length < 60; i++) r.push(i); return r; })).sort((a,b)=>b-a);
-  fill($("#year"), years, "السنة");
+  fill($("#year"), K.YEARS, "السنة");
   state.year = $("#year").value;
 }
 const fitsCar = p => (!state.make && !state.model && !state.year) ||
@@ -471,7 +529,7 @@ function renderGrid() {
   const filtered = state.q || state.cond || state.make || state.cat;
   $("#resTitle").textContent = filtered ? "نتائج البحث" : "أحدث القطع";
   $("#resCount").textContent = `${list.length.toLocaleString("ar-SA")} قطعة`;
-  if (!list.length && CAT.results.length) { $("#grid").innerHTML = ""; $("#resCount").textContent = ""; $("#resTitle").textContent = ""; $("#moreWrap").classList.add("hide"); return; }
+  if (!list.length && (CAT.results.length || CAT.mode === "car")) { $("#grid").innerHTML = ""; $("#resCount").textContent = ""; $("#resTitle").textContent = ""; $("#moreWrap").classList.add("hide"); return; }
   if (!list.length) {
     $("#grid").innerHTML = `<div class="empty"><h3>ما لقينا القطعة في المعروض</h3><p>كثير من القطع عندنا ما تكون معروضة بعد. أرسل طلبك ونرد عليك بالسعر.</p><button class="btn" data-action="request-from-search">اطلب هذي القطعة</button></div>`;
     $("#moreWrap").classList.add("hide");
@@ -559,11 +617,18 @@ function closeAll(clearHash = true) {
   $("#ov").classList.remove("on"); document.body.style.overflow = "";
   if (clearHash && location.hash.startsWith("#part=")) history.replaceState(null, "", location.pathname + location.search);
 }
+const setOpt = (sel, v) => { if (!v) return; v = String(v); if (![...sel.options].some(o => o.value === v)) sel.add(new Option(v, v)); sel.value = v; };
+function fillReqModels(form) { $("#reqModels").innerHTML = carModels(form.make.value).map(x => `<option value="${esc(x)}">`).join(""); }
+function wireReqForm(form) {
+  fill(form.make, carMakes(), "الماركة");
+  fill(form.year, K.YEARS, "السنة");
+  form.make.addEventListener("change", () => fillReqModels(form));
+}
 function openRequest(prefill = "") {
   const f = $("#reqForm"); if (!f) { resetRequest(); }
   const form = $("#reqForm");
   if (prefill) form.part_text.value = prefill;
-  if (state.make) form.vehicle.value = [state.make, state.model, state.year].filter(Boolean).join(" ");
+  if (state.make) { setOpt(form.make, state.make); fillReqModels(form); form.model.value = state.model || ""; setOpt(form.year, state.year); }
   open("#reqModal");
 }
 
@@ -583,6 +648,7 @@ async function submitOrder() {
   Object.keys(d).forEach(k => d[k] = d[k].trim());
   if (!d.customer_name || !d.phone || !d.city) { K.toast("عبّ الاسم والجوال والمدينة"); return; }
   if (!phoneOk(d.phone)) { K.toast("رقم الجوال غير صحيح"); return; }
+  if (d.vin && !K.vinOk(d.vin)) { K.toast("رقم الهيكل لازم يكون ١٧ خانة صحيحة، أو اتركه فاضي"); return; }
   const ids = Object.keys(cart);
   const items = ids.filter(id => item(id)).map(id => { const p = item(id); return {id, name: p.name, part_number: p.part_number || "", condition: p.condition, make: p.make || null, supplier: p.supplier || null, sheet: p.sheet || null, code: p.code || null, price: p.price, qty: cart[id]}; });
   const total = items.reduce((s, i) => s + (+i.price || 0) * i.qty, 0);
@@ -609,7 +675,7 @@ async function submitOrder() {
 
 function resetRequest() {
   $("#reqBody").innerHTML = document.getElementById("reqTpl").innerHTML;
-  $("#reqForm").addEventListener("submit", submitRequest);
+  $("#reqForm").addEventListener("submit", submitRequest); wireReqForm($("#reqForm"));
 }
 async function submitRequest(e) {
   e.preventDefault();
@@ -618,9 +684,11 @@ async function submitRequest(e) {
   Object.keys(d).forEach(k => d[k] = d[k].trim());
   if (!d.part_text || !d.name || !d.phone) { K.toast("عبّ القطعة والاسم والجوال"); return; }
   if (!phoneOk(d.phone)) { K.toast("رقم الجوال غير صحيح"); return; }
+  if (d.vin && !K.vinOk(d.vin)) { K.toast("رقم الهيكل لازم يكون ١٧ خانة صحيحة، أو اتركه فاضي"); return; }
+  d.vehicle = [d.make, d.model, d.year].filter(Boolean).join(" ");
   const b = f.querySelector("button[type=submit]"); b.disabled = true; b.textContent = "جاري الإرسال…";
   try {
-    await DB.createRequest({name: d.name, phone: d.phone, city: d.city || null, vehicle: d.vehicle || null, vin: d.vin || null, part_text: d.part_text});
+    await DB.createRequest({name: d.name, phone: d.phone, city: d.city || null, vehicle: d.vehicle || null, make: d.make || null, model: d.model || null, year: d.year ? +d.year : null, vin: d.vin ? d.vin.toUpperCase() : null, part_text: d.part_text});
     const msg = `طلب قطعة من موقع كاسب\n\nالقطعة: ${d.part_text}\n${d.vehicle ? "السيارة: " + d.vehicle + "\n" : ""}${d.vin ? "رقم الهيكل: " + d.vin + "\n" : ""}الاسم: ${d.name}\nالجوال: ${d.phone}${d.city ? "\nالمدينة: " + d.city : ""}\n\n(أرفقت صورة القطعة)`;
     $("#reqBody").innerHTML = `<div class="done"><div class="ok">✓</div><h3 style="margin:0 0 6px">وصلنا طلبك</h3><p class="muted" style="margin:0 0 16px">نبحث عن القطعة ونرجع لك بالسعر على ${esc(d.phone)}.<br>عندك صورة للقطعة؟ أرسلها واتساب لنتأكد أسرع.</p><a class="btn wa block" target="_blank" rel="noopener" href="${K.wa(msg)}">إرسال صورة القطعة واتساب</a><button class="btn ghost block" style="margin-top:8px" data-action="new-request">طلب قطعة أخرى</button></div>`;
   } catch (err) {
@@ -641,9 +709,9 @@ $("#q").addEventListener("input", e => { clearTimeout(qt); qt = setTimeout(() =>
 $("#q").addEventListener("keydown", e => { if (e.key === "Enter") { e.target.blur(); document.getElementById("parts").scrollIntoView({behavior: "smooth"}); } });
 $("#sort").onchange = e => { state.sort = e.target.value; renderGrid(); };
 $("#seg").onclick = e => { const b = e.target.closest("button"); if (!b) return; state.cond = b.dataset.v; state.cat = ""; state.limit = PAGE; $$("#seg button").forEach(x => x.classList.toggle("on", x === b)); renderChips(); renderGrid(); };
-$("#make").onchange = () => { $("#model").value = ""; $("#year").value = ""; refreshCarSelects(); state.limit = PAGE; renderGrid(); searchCatalog(); };
-$("#model").onchange = () => { $("#year").value = ""; refreshCarSelects(); state.limit = PAGE; renderGrid(); };
-$("#year").onchange = e => { state.year = e.target.value; renderGrid(); };
+$("#make").onchange = () => { $("#model").value = ""; refreshCarSelects(); state.limit = PAGE; renderGrid(); searchCatalog(); };
+$("#model").onchange = () => { refreshCarSelects(); state.limit = PAGE; renderGrid(); searchCatalog(); };
+$("#year").onchange = e => { state.year = e.target.value; renderGrid(); searchCatalog(); };
 $("#reset").onclick = () => {
   $("#q").value = ""; Object.assign(state, {q: "", cond: "", cat: "", make: "", model: "", year: "", limit: PAGE});
   $("#make").value = ""; refreshCarSelects(); $$("#seg button").forEach(b => b.classList.toggle("on", b.dataset.v === "")); renderChips(); renderGrid(); searchCatalog();
@@ -654,6 +722,13 @@ $("#openCart").onclick = () => open("#drawer");
 $("#openRequest").onclick = () => openRequest();
 $("#submitOrder").onclick = submitOrder;
 $("#ov").onclick = () => closeAll();
+document.addEventListener("input", e => {
+  if (e.target.name !== "vin") return;
+  const h = e.target.parentElement.querySelector("[data-vinhint]"); if (!h) return;
+  const v = e.target.value = e.target.value.toUpperCase().replace(/\s/g, ""), info = K.vinInfo(v);
+  h.className = "vin-hint" + (!v ? "" : info.ok ? " ok" : " bad");
+  h.textContent = !v ? "موجود في الاستمارة وأسفل الزجاج الأمامي، ١٧ خانة" : info.ok ? (info.make ? `رقم هيكل ${info.make} ✓` : "رقم هيكل صحيح ✓") : info.msg;
+});
 document.addEventListener("keydown", e => { if (e.key === "Escape") closeAll(); });
 
 document.addEventListener("click", e => {
@@ -680,7 +755,7 @@ document.addEventListener("click", e => {
 /* ---------- boot ---------- */
 (async function boot() {
   const tpl = document.createElement("template"); tpl.id = "reqTpl"; tpl.innerHTML = $("#reqBody").innerHTML; document.body.appendChild(tpl);
-  $("#reqForm").addEventListener("submit", submitRequest);
+  $("#reqForm").addEventListener("submit", submitRequest); wireReqForm($("#reqForm"));
   const C = K.C, waHello = K.wa("السلام عليكم، أبي أستفسر عن قطعة غيار");
   $("#fab").href = waHello;
   $("#waBand").href = K.wa("السلام عليكم، أبحث عن قطعة وأرفقت صورتها:");
@@ -699,6 +774,9 @@ document.addEventListener("click", e => {
     return;
   }
   refreshCarSelects(); renderAll();
+  if (K.C.oemCatalogUrl) { const a = $("#oemLink"); a.href = K.C.oemCatalogUrl; a.classList.remove("hide"); }
+  const sp = new URLSearchParams(location.search), qp = (sp.get("q") || sp.get("pn") || sp.get("article") || "").trim();
+  if (qp) { $("#q").value = qp; state.q = qp; renderGrid(); searchCatalog().then(() => document.getElementById("parts").scrollIntoView({behavior: "smooth", block: "start"})); }
   catManifest().then(cm => { if (cm) { const t = $("#catTrust"); t.textContent = `أكثر من ${(Math.floor(cm.count / 100000) / 10).toLocaleString("ar-SA")} مليون رقم قطعة بأسعارها`; t.classList.remove("hide"); } });
   const m = location.hash.match(/^#part=(.+)$/); if (m) openPart(decodeURIComponent(m[1]), false);
 })();
